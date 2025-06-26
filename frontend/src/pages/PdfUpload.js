@@ -31,7 +31,7 @@ const PdfUpload = () => {
 
   return (
       <div className="w-full max-w-md mx-auto p-4 bg-white rounded shadow text-gray-800">
-          <h2 className="mb-2 font-bold ">PDF 업로드</h2>
+          <h2 className="mb-2 font-bold "> PDF 업로드 </h2>
           <form onSubmit={handleUpload}>
               <input
                   type="file"
