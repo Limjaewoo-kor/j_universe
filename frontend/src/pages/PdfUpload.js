@@ -31,19 +31,23 @@ const PdfUpload = () => {
 
   return (
       <div className="w-full max-w-md mx-auto p-4 bg-white rounded shadow text-gray-800">
-              <h2 className="mb-2 font-bold ">PDF 업로드</h2>
-              <form onSubmit={handleUpload}>
-                  <input
-                      type="file"
-                      accept=".pdf"
-                      onChange={handleFileChange}
-                      className="mb-2"
-                  />
-                  <button type="submit" className="bg-blue-500 text-white px-4 py-1 rounded">업로드</button>
-              </form>
-              {msg && <div className="mt-2 text-blue-600">{msg}</div>}
-          </div>
-          );
-          };
+          <h2 className="mb-2 font-bold ">PDF 업로드</h2>
+          <form onSubmit={handleUpload}>
+              <input
+                  type="file"
+                  accept=".pdf"
+                  onChange={handleFileChange}
+                  className="mb-2"
+              />
+              <button type="submit" className="bg-blue-500 text-white px-4 py-1 rounded">업로드</button>
+          </form>
+          {msg &&
+              <div className="mt-2 text-blue-600">
+                  {msg}
+              </div>
+          }
+      </div>
+  );
+};
 
-          export default PdfUpload;
+export default PdfUpload;
