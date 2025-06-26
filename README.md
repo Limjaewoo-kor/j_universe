@@ -11,7 +11,7 @@
 
 
 rander = https://malhaejo-backend.onrender.com
-vercel = https://malhaejo.vercel.app/
+vercel = https://j-universe.vercel.app/
 
 배포 후 변경 필요
 
