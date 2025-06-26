@@ -38,8 +38,11 @@ yarn-debug.log*
 yarn-error.log*
 
 
-chroma_store/
-data/
+data/*
+!data/
+chroma_store/*
+!chroma_store/
+
 *.bin
 *.sqlite3
 *.db
