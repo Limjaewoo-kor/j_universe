@@ -9,6 +9,7 @@ from langchain.prompts import PromptTemplate
 from routes import auth
 from database import Base, engine
 from routes import feedback
+from routes import upload
 import os
 from dotenv import load_dotenv
 from routes import chat, rag_chat
@@ -30,7 +31,7 @@ app.include_router(auth.router)
 app.include_router(chat.router)
 app.include_router(rag_chat.router)
 app.include_router(feedback.router)
-
+app.include_router(upload.router)
 
 # CORS 설정 (로컬 React 연동용)
 app.add_middleware(
@@ -200,9 +201,6 @@ prompt_map = {
 }
 
 
-
-
-
 @app.get("/")
 async def root():
     return {"message": "MainPage"}
@@ -249,24 +247,3 @@ async def get_append_rag():
     append_rag()
     return {"append Complete"}
 
-
-
-
-
-# class Feedback(BaseModel):
-#     type: str   # ex. "bug", "suggestion", "etc"
-#     content: str
-#
-# # 서버 메모리에 임시 저장 (리스트)
-# feedbacks: List[Feedback] = []
-
-# @app.post("/api/feedback")
-# def submit_feedback(feedback: Feedback):
-#     #/api/feedback : 사용자 피드백을 POST로 저장
-#     feedbacks.append(feedback)
-#     return {"result": "success"}
-#
-# @app.get("/api/feedbacks")
-# def get_feedbacks():
-#     #/api/feedbacks : 저장된 모든 피드백을 GET으로 조회 (관리자 페이지 용도)
-#     return feedbacks

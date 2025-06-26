@@ -118,7 +118,7 @@ def append_rag():
         embedding_function=embedding
     )
     #사용 예시:
-    new_pdf_path = glob('./data/디지몬 가이드_복사본2.pdf')
+    new_pdf_path = glob('./data/append.pdf')
 
     # 2. 새로운 PDF 처리
     loader = PyPDFLoader(new_pdf_path)

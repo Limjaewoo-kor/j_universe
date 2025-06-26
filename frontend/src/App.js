@@ -24,6 +24,7 @@ import FeedbackAdminPage from "./pages/FeedbackAdminPage";
 import { AuthProvider } from "./contexts/authContext";
 
 import Header from './components/Header';
+import PdfUpload from "./pages/PdfUpload";
 
 // ✅ 페이지 이동 시 GA 이벤트 전송
 function usePageTracking() {
@@ -83,13 +84,13 @@ function AppWrapper() {
       )}
       {/*<Header isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} toggleTheme={toggleTheme} />*/}
       <Routes>
-        {/* chat 경로 추가 */}
         <Route path="/" element={<MainPage />} />
          {/* chat 경로 추가 */}
         <Route path="/chat" element={<ChatPage />} />
         {/* feedback 경로 추가 */}
         <Route path="/feedback" element={<FeedbackForm />} />
         <Route path="/jw/feedbacks" element={<FeedbackAdminPage />} />
+        <Route path="/jw/pdfupload" element={<PdfUpload />} />
 
         <Route path="/home" element={<HomePage />} />
         <Route path="/purpose" element={<PurposePage />} />
