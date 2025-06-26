@@ -1,0 +1,137 @@
+/* 로그인 페이지 기본 스타일 */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f3f4f6; /* 라이트모드 배경 */
+  padding: 20px;
+}
+
+body.dark .login-container {
+  background-color: #1e293b; /* 다크모드 배경 */
+}
+
+.login-box {
+  background-color: white; /* 라이트모드에서 흰 배경 */
+  padding: 40px 40px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+}
+
+body.dark .login-box {
+  background-color: #2a3b4c; /* 다크모드에서 어두운 배경 */
+}
+
+.login-title {
+  text-align: center;
+  font-size: 32px;
+  font-weight: 700;
+  color: #333; /* 라이트모드 텍스트 색상 */
+  margin-bottom: 30px;
+}
+
+body.dark .login-title {
+  color: #f1f5f9; /* 다크모드에서 밝은 텍스트 색상 */
+}
+
+.input-field {
+  margin-bottom: 20px;
+}
+
+.input-field input {
+  width: 100%;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+  color: #333; /* 라이트모드 텍스트 색상 */
+  background-color: white; /* 라이트모드 배경 */
+}
+
+body.dark .input-field input {
+  background-color: #334155; /* 다크모드 배경 */
+  border: 1px solid #4b8cfd; /* 다크모드 입력 필드 색상 */
+  color: #f1f5f9; /* 다크모드 텍스트 색상 */
+}
+
+.input-field input:focus {
+  outline: none;
+  border-color: #4b8cfd;
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.remember-me input {
+  margin-right: 10px;
+}
+
+.login-button {
+  width: 100%;
+  padding: 15px;
+  background-color: #4b8cfd; /* 라이트모드 버튼 색상 */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+body.dark .login-button {
+  background-color: #357ac9; /* 다크모드 버튼 색상 */
+}
+
+.login-button:hover {
+  background-color: #357ac9;
+}
+
+body.dark .login-button:hover {
+  background-color: #285a8e; /* 다크모드 버튼 hover 색상 */
+}
+
+.footer {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.footer a {
+  color: #4b8cfd;
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+body.dark .footer a {
+  color: #a3bffa; /* 다크모드에서 링크 색상 */
+}
+
+
+/* Light mode styles */
+body {
+  background-color: white;
+  color: black;
+}
+
+/* Dark mode styles */
+body.dark {
+  background-color: #1a202c;
+  color: white;
+}
+
+.login-container {
+  background: white;
+  color: black;
+}
+
+body.dark .login-container {
+  background: #1a202c;
+  color: white;
+}
