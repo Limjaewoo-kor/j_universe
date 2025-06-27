@@ -80,7 +80,7 @@ const LoginPage = () => {
             </button>
           </form>
           <div className="text-center mt-3 text-sm">
-            <Link to="/signup" className="text-blue-500 hover:underline">회원가입</Link>
+            {/*<Link to="/signup" className="text-blue-500 hover:underline">회원가입</Link>*/}
             {/* <a href="/forgot-password">ID/PW 찾기</a> | <a href="/signup">회원가입</a> */}
           </div>
         </div>

@@ -36,7 +36,7 @@ const Signup = () => {
           onChange={(e) => setPassword(e.target.value)}
         />
       </div>
-      <button type="submit" className="login-button">회원가입</button>
+      {/*<button type="submit" className="login-button">회원가입</button>*/}
     </form>
   );
 };
