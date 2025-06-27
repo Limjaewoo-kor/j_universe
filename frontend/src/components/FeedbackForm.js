@@ -24,9 +24,9 @@ const FeedbackForm = ({ onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-xl min-w-[500px] ">
-        <h2 className="text-lg font-bold mb-2">Send Feedback</h2>
+    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 px-2">
+      <div className="bg-white dark:bg-gray-900 rounded-xl p-4 sm:p-6 shadow-xl w-full max-w-md">
+        <h2 className="text-base sm:text-lg font-bold mb-2">Send Feedback</h2>
         <form onSubmit={handleSubmit}>
           <select
             value={type}
@@ -44,7 +44,7 @@ const FeedbackForm = ({ onClose }) => {
             onChange={(e) => setContent(e.target.value)}
             placeholder="챗봇과 관련된 피드백은 질문/답변 형식으로 작성해주세요. Please provide feedback regarding the chatbot in a question/answer format."
             required
-            className="mb-2 w-full p-2 border rounded text-black min-h-[200px]"
+            className="mb-2 w-full p-2 border rounded text-black min-h-[120px] sm:min-h-[200px]"
           />
           <div className="flex justify-end gap-2">
             <button type="button" onClick={onClose} className="px-3 py-1 rounded bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600">Close</button>

@@ -30,23 +30,23 @@ const PdfUpload = () => {
   };
 
   return (
-      <div className="w-full max-w-md mx-auto p-4 bg-white rounded shadow text-gray-800">
-          <h2 className="mb-2 font-bold "> PDF 업로드 </h2>
-          <form onSubmit={handleUpload}>
-              <input
-                  type="file"
-                  accept=".pdf"
-                  onChange={handleFileChange}
-                  className="mb-2"
-              />
-              <button type="submit" className="bg-blue-500 text-white px-4 py-1 rounded">업로드</button>
-          </form>
-          {msg &&
-              <div className="mt-2 text-blue-600">
-                  {msg}
-              </div>
-          }
-      </div>
+    <div className="w-full max-w-xs sm:max-w-md mx-auto p-4 bg-white dark:bg-gray-800 rounded shadow text-gray-800 dark:text-white mt-8">
+      <h2 className="mb-2 font-bold text-center">PDF 업로드</h2>
+      <form onSubmit={handleUpload} className="flex flex-col gap-2">
+        <input
+          type="file"
+          accept=".pdf"
+          onChange={handleFileChange}
+          className="mb-2"
+        />
+        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">업로드</button>
+      </form>
+      {msg &&
+        <div className="mt-2 text-blue-600 text-center">
+          {msg}
+        </div>
+      }
+    </div>
   );
 };
 

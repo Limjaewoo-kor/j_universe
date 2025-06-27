@@ -1,14 +1,10 @@
-// Header.js
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ThemeContext } from '../contexts/ThemeContext';
-import { useAuth } from '../contexts/authContext'; // 추가
-
-import { Moon, Sun } from 'lucide-react';
+import { useAuth } from '../contexts/authContext';
 
 const Header = ({ toggleTheme, theme }) => {
   const navigate = useNavigate();
-  const { isLoggedIn, setIsLoggedIn } = useAuth(); // 여기서 바로 사용
+  const { isLoggedIn, setIsLoggedIn } = useAuth();
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -17,21 +13,20 @@ const Header = ({ toggleTheme, theme }) => {
   };
 
   return (
-    <header className="flex justify-between items-center px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
-      <div>
-        <h1 className="text-xl font-bold text-blue-600 dark:text-blue-300">말해조 🗣️</h1>
-        <nav className="mt-1 space-x-4 text-sm text-gray-700 dark:text-gray-300">
+    <header className="flex flex-col md:flex-row justify-between items-center px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
+      <div className="mb-2 md:mb-0 text-center md:text-left">
+        <h1 className="text-lg sm:text-xl font-bold text-blue-600 dark:text-blue-300">말해조 🗣️</h1>
+        <nav className="mt-1 flex flex-col md:flex-row gap-2 md:gap-4 text-sm text-gray-700 dark:text-gray-300 items-center">
           <Link to="/" className="hover:text-blue-400">J_Universe_home</Link>
           <Link to="/home" className="hover:text-blue-400">Malhaejo_home</Link>
           <Link to="/history" className="hover:text-blue-400">history</Link>
           <Link to="/templates" className="hover:text-blue-400">template</Link>
-          {/*<Link to="/feedback" className="hover:text-blue-400">피드백</Link>*/}
           {isLoggedIn && (
-            <Link to="/profile">mypage</Link>
+            <Link to="/profile" className="hover:text-blue-400">mypage</Link>
           )}
         </nav>
       </div>
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center gap-2 mt-2 md:mt-0">
         {isLoggedIn ? (
           <button
             onClick={handleLogout}
@@ -60,8 +55,8 @@ const Header = ({ toggleTheme, theme }) => {
           {/*>*/}
           {/*  {theme === 'dark' ? <Sun className="w-5 h-5 text-yellow-300" /> : <Moon className="w-5 h-5 text-gray-800" />}*/}
           {/*</button>*/}
-          </div>
-      </header>
+      </div>
+    </header>
   );
 };
 

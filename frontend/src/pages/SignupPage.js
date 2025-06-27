@@ -1,9 +1,7 @@
 import React, { useEffect } from 'react';
 import Signup from '../components/Signup';
-import './SignupPage.css'; // 스타일 적용
 
 const SignupPage = () => {
-  // 다크모드 상태에 따른 body 클래스를 관리
   useEffect(() => {
     const theme = localStorage.getItem('theme') || 'light';
     if (theme === 'dark') {
@@ -14,9 +12,9 @@ const SignupPage = () => {
   }, []);
 
   return (
-    <div className="login-container">
-      <div className="login-box">
-        <h2 className="login-title">SIGNUP</h2>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 px-2">
+      <div className="w-full max-w-xs bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md">
+        <h2 className="text-center text-2xl font-bold mb-6 text-blue-600 dark:text-blue-300">SIGNUP</h2>
         <Signup />
       </div>
     </div>

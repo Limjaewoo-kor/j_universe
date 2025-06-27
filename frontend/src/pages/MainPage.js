@@ -1,4 +1,3 @@
-// src/pages/MainPage.js
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -15,15 +14,14 @@ const menuList = [
 
 export default function MainPage() {
   const navigate = useNavigate();
-// dark:text-blue-300"
   return (
-    <div className="flex flex-col items-center min-h-screen dark:from-gray-900 justify-center">
-      <h1 className="text-6xl font-bold mb-16 tracking-widest">J_Universe</h1>
-      <div className="grid grid-cols-2 gap-12">
+    <div className="flex flex-col items-center min-h-screen justify-center px-2 py-8">
+      <h1 className="text-3xl sm:text-6xl font-bold mb-12 sm:mb-16 tracking-widest">J_Universe</h1>
+      <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8 w-full max-w-3xl">
         {menuList.map((menu, idx) => (
           <button
             key={menu.label}
-            className="w-48 h-48 rounded-2xl border-2 border-black flex items-center justify-center text-2xl font-semibold hover:bg-blue-300 transition"
+            className="w-full h-24 sm:h-48 rounded-2xl border-2 border-black flex items-center justify-center text-lg sm:text-2xl font-semibold hover:bg-blue-300 transition"
             onClick={() => navigate(menu.to)}
           >
             {menu.label}
