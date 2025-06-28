@@ -38,7 +38,10 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173",
                    "http://localhost:3000",
-                   "https://j-universe.vercel.app"],  # Vite일 경우
+                   "https://j-universe.vercel.app"
+                   "https://j-uni.com",
+                   "https://www.j-uni.com",
+                   ],  # Vite일 경우
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
