@@ -12,6 +12,8 @@
 
 rander = https://malhaejo-backend.onrender.com
 vercel = https://j-universe.vercel.app/
+buymeacoffee = https://coff.ee/j.uni
+domain = https://www.j-uni.com/
 
 배포 후 변경 필요
 

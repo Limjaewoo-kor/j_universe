@@ -43,7 +43,7 @@ const LoginPage = () => {
           <nav className="space-x-2 text-sm text-gray-300">
             <Link to="/" className="hover:text-blue-400">J_Universe_home</Link>
             <Link to="/home" className="hover:text-blue-400">Malhaejo_home</Link>
-            <Link to="/chat" className="hover:text-blue-400">Rumble_Guide_home</Link>
+            <Link to="/chat" className="hover:text-blue-400">Rumble_Chatbot_home</Link>
           </nav>
         </div>
       </div>

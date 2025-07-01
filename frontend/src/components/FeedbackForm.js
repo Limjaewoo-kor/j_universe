@@ -11,7 +11,7 @@ const FeedbackForm = ({ onClose }) => {
     try {
       const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:8000";
       await axios.post(`${API_BASE_URL}/feedback`, {
-        project: "rumble_guide_chatbot",
+        project: "rumble_chatbot",
         feedback_text: content,
         type: type // 백엔드가 지원한다면
       });

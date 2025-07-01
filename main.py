@@ -50,7 +50,7 @@ app.add_middleware(
 # GPT 모델 설정
 llm = ChatOpenAI(
     temperature=0.7,
-    model_name="gpt-4o-mini",  # 필요시 변경
+    model_name="gpt-4o",  # 필요시 변경
     openai_api_key=openai_api_key # .env로 관리 권장
 )
 
