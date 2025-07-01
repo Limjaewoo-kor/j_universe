@@ -1,9 +1,12 @@
 from glob import glob
+import re
+import shutil
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_chroma import Chroma
 from langchain_core.prompts import PromptTemplate
+from langchain.schema import Document
 from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel, Field
 from typing import Literal
@@ -81,31 +84,67 @@ async def generate_rag_answer(question: str) -> str:
     return await run_in_threadpool(_generate_rag_sync, question)
 
 
-def create_rag() :
-    # http://localhost:8000/rag-create
-    pdf_files = glob('./data/*.pdf')  # ← 여기가 원본 PDF 폴더
+def extract_qa_blocks(text):
+    # "Q. ~ A. ~" 블록을 정규식으로 추출
+    pattern = r'Q\..*?A\..*?(?=Q\.|$)'
+    return re.findall(pattern, text, re.DOTALL)
 
-    print(pdf_files)
-    embedding = OpenAIEmbeddings(model='text-embedding-3-large')
+
+def create_rag():
+    pdf_files = glob('./data/*.pdf')  # 원본 PDF 경로
     persist_directory = './chroma_store'
 
+    # 기존 벡터스토어 폴더 삭제 (덮어쓰기 위해)
+    shutil.rmtree(persist_directory, ignore_errors=True)
+
+    # OpenAI 임베딩 설정
+    embedding = OpenAIEmbeddings(model='text-embedding-3-large')
     all_chunks = []
+
     for pdf_path in pdf_files:
         loader = PyPDFLoader(pdf_path)
-        print("pdf_path : " + pdf_path)
-        docs = loader.load()
-        print(docs)
-        splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=20)
-        print(splitter)
-        chunks = splitter.split_documents(docs)
-        print(chunks)
-        all_chunks.extend(chunks)
+        pages = loader.load()  # 각 페이지별로 Document 객체 반환
 
+        for page in pages:
+            qa_blocks = extract_qa_blocks(page.page_content)
+            for block in qa_blocks:
+                doc = Document(page_content=block.strip(), metadata=page.metadata)
+                all_chunks.append(doc)
+
+    # Chroma 벡터스토어 생성 및 저장
     vectorstore = Chroma.from_documents(
         documents=all_chunks,
         embedding=embedding,
         persist_directory=persist_directory
     )
+
+    print(f" 총 {len(all_chunks)}개의 QA 문서 블록을 저장했습니다.")
+
+
+# def create_rag() :
+#     # http://localhost:8000/rag-create
+#     pdf_files = glob('./data/*.pdf')  # ← 여기가 원본 PDF 폴더
+#
+#     print(pdf_files)
+#     embedding = OpenAIEmbeddings(model='text-embedding-3-large')
+#     persist_directory = './chroma_store'
+#
+#     all_chunks = []
+#     for pdf_path in pdf_files:
+#         loader = PyPDFLoader(pdf_path)
+#         docs = loader.load()
+#
+#         splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=20)
+#         print(splitter)
+#         chunks = splitter.split_documents(docs)
+#         print(chunks)
+#         all_chunks.extend(chunks)
+#
+#     vectorstore = Chroma.from_documents(
+#         documents=all_chunks,
+#         embedding=embedding,
+#         persist_directory=persist_directory
+#     )
 
 
 def append_rag():
