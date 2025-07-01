@@ -95,7 +95,7 @@ def create_rag():
     persist_directory = './chroma_store'
 
     # 기존 벡터스토어 폴더 삭제 (덮어쓰기 위해)
-    shutil.rmtree(persist_directory, ignore_errors=True)
+    # shutil.rmtree(persist_directory, ignore_errors=True)
 
     # OpenAI 임베딩 설정
     embedding = OpenAIEmbeddings(model='text-embedding-3-large')
