@@ -30,6 +30,10 @@ vectorstore = PGVector(
     use_jsonb=True
 )
 
+#최초 실행 시 초기화쿼리
+vectorstore.create_tables_if_not_exists()
+vectorstore.create_collection()
+
 retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
 
 # GPT 모델
