@@ -1,6 +1,5 @@
 from glob import glob
 import re
-import shutil
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
@@ -10,15 +9,30 @@ from langchain.schema import Document
 from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel, Field
 from typing import Literal
+import os
+from dotenv import load_dotenv
+from langchain_postgres.vectorstores import PGVector
 
-embedding = OpenAIEmbeddings(model='text-embedding-3-large')
-persist_directory = './chroma_store'
 
-vectorstore = Chroma(
-    persist_directory=persist_directory,
-    embedding_function=embedding
+
+# .env 로드
+load_dotenv()
+
+# Embedding 모델 및 DB 연결
+embeddingModel = OpenAIEmbeddings(model='text-embedding-3-large')
+CONNECTION_STRING = os.getenv("DATABASE_URL")
+
+
+vectorstore = PGVector(
+    connection=CONNECTION_STRING,
+    embeddings=embeddingModel,
+    collection_name="documents",
+    use_jsonb=True
 )
+
 retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
+
+# GPT 모델
 model = ChatOpenAI(model="gpt-4o")
 
 # RAG 프롬프트
@@ -50,7 +64,7 @@ rag_prompt = PromptTemplate(
 )
 rag_chain = rag_prompt | model
 
-# 문서 relevance 평가 프롬프트/체인
+# 문서 relevance 프롬프트 평가 체인
 class GradeDocuments(BaseModel):
     binary_score: Literal["yes", "no"] = Field(
         description="문서가 질문과 관련이 있는지 여부를 'yes' 또는 'no'로 평가합니다."
@@ -65,6 +79,7 @@ Retrieved document: {document}
 User question: {question}
 """)
 retrieval_grader = grader_prompt | structured_llm_grader
+
 
 def _generate_rag_sync(question: str) -> str:
     docs = retriever.invoke(question)
@@ -89,41 +104,29 @@ def extract_qa_blocks(text):
     pattern = r'Q\..*?A\..*?(?=Q\.|$)'
     return re.findall(pattern, text, re.DOTALL)
 
-
 def create_rag():
-    pdf_files = glob('./data/*.pdf')  # 원본 PDF 경로
-    persist_directory = './chroma_store'
-
-    # 기존 벡터스토어 폴더 삭제 (덮어쓰기 위해)
-    # shutil.rmtree(persist_directory, ignore_errors=True)
-
-    # OpenAI 임베딩 설정
-    embedding = OpenAIEmbeddings(model='text-embedding-3-large')
+    pdf_files = glob('./data/*.pdf')
     all_chunks = []
 
     for pdf_path in pdf_files:
         loader = PyPDFLoader(pdf_path)
-        pages = loader.load()  # 각 페이지별로 Document 객체 반환
-
+        pages = loader.load()
         for page in pages:
             qa_blocks = extract_qa_blocks(page.page_content)
             for block in qa_blocks:
                 doc = Document(page_content=block.strip(), metadata=page.metadata)
                 all_chunks.append(doc)
 
-    # Chroma 벡터스토어 생성 및 저장
-    vectorstore = Chroma.from_documents(
-        documents=all_chunks,
-        embedding=embedding,
-        persist_directory=persist_directory
-    )
-
-    print(f" 총 {len(all_chunks)}개의 QA 문서 블록을 저장했습니다.")
+    vectorstore.add_documents(all_chunks)
+    print(f"총 {len(all_chunks)}개의 QA 문서 블록을 저장했습니다.")
 
 
+
+
+# 청크사이즈와 청크 오버랩 기준으로 분할 + Chroma 사용 예시
 # def create_rag() :
 #     # http://localhost:8000/rag-create
-#     pdf_files = glob('./data/*.pdf')  # ← 여기가 원본 PDF 폴더
+#     pdf_files = glob('./data/*.pdf')
 #
 #     print(pdf_files)
 #     embedding = OpenAIEmbeddings(model='text-embedding-3-large')
@@ -145,29 +148,3 @@ def create_rag():
 #         embedding=embedding,
 #         persist_directory=persist_directory
 #     )
-
-
-def append_rag():
-    # http://localhost:8000/append-create
-    # 1. 기존 chroma_store 연결
-    persist_directory = './chroma_store'
-    embedding = OpenAIEmbeddings(model='text-embedding-3-large')
-    vectorstore = Chroma(
-        persist_directory=persist_directory,
-        embedding_function=embedding
-    )
-    #사용 예시:
-    new_pdf_path = glob('./data/append.pdf')
-
-    # 2. 새로운 PDF 처리
-    loader = PyPDFLoader(new_pdf_path)
-    docs = loader.load()
-    splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=20)
-    chunks = splitter.split_documents(docs)
-
-    # 3. 벡터스토어에 append (추가)
-    vectorstore.add_documents(chunks)
-    vectorstore.persist()
-
-    print(f"{new_pdf_path}의 내용이 기존 chroma_store에 append(추가) 완료!")
-

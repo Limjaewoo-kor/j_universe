@@ -16,5 +16,6 @@ class FeedbackRead(BaseModel):
     type: Optional[str] = None  # ← 여기 추가!
     created_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = {
+        "from_attributes": True
+    }

@@ -13,7 +13,7 @@ from routes import upload
 import os
 from dotenv import load_dotenv
 from routes import chat, rag_chat
-from services.rag_llm import generate_rag_answer, create_rag, append_rag
+from services.rag_llm import generate_rag_answer, create_rag
 
 load_dotenv()
 
@@ -242,11 +242,4 @@ async def get_create_rag():
     print("create rag")
     create_rag()
     return {"create Complete"}
-
-
-@app.get("/append-create")
-async def get_append_rag():
-    print("append rag")
-    append_rag()
-    return {"append Complete"}
 
