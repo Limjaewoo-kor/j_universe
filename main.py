@@ -6,13 +6,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
-from routes import auth
 from database import Base, engine
-from routes import feedback
-from routes import upload
 import os
 from dotenv import load_dotenv
-from routes import chat, rag_chat
+from routes import chat, rag_chat, feedback, upload, rumbleChat, auth
 from services.rag_llm import generate_rag_answer, create_rag
 
 load_dotenv()
@@ -32,6 +29,7 @@ app.include_router(chat.router)
 app.include_router(rag_chat.router)
 app.include_router(feedback.router)
 app.include_router(upload.router)
+app.include_router(rumbleChat.router)
 
 # CORS 설정 (로컬 React 연동용)
 app.add_middleware(

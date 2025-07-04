@@ -19,6 +19,7 @@ const ChatPage = () => {
   const [userCount, setUserCount] = useState(1);
   const socketRef = useRef(null);
   const [showFeedback, setShowFeedback] = useState(false);
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:8000";
 
   useEffect(() => {
     socketRef.current = createWebSocketConnection((msg) => {
@@ -31,12 +32,33 @@ const ChatPage = () => {
         setMessages((prevMessages) => [...prevMessages, msg]);
       }
     });
-    return () => socketRef.current.close();
-  }, []);
+    //DB에서 채팅 이력 불러오기 (익명 채팅방 고정 session_id 사용)
+    fetch(`${API_BASE_URL}/chat-history/rumbleChat`)
+      .then((res) => res.json())
+      .then((data) => {
+         if (Array.isArray(data)) {
+            const restored = data.map(m => `${m.role} : ${m.content}`);
+            setMessages(restored);
+         } else {
+            console.error("Expected array but got:", data);
+         }
+      });
+      return () => socketRef.current.close();
+    }, []);
 
   const sendMessage = (message) => {
     if (socketRef.current && message.trim()) {
       socketRef.current.send(message);
+      // ✅ DB 저장 요청 추가
+      fetch(`${API_BASE_URL}/chat-message`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          session_id: "rumbleChat",
+          role: userId || "anonymous",
+          content: message
+        })
+      });
     }
   };
 
