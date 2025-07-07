@@ -1,0 +1,17 @@
+version: 0.1
+component: build
+timeoutInSeconds: 10000
+shell: bash
+
+steps:
+  - type: Command
+    name: "Install dependencies"
+    command: |
+      sudo apt update
+      sudo apt install -y python3-pip
+      pip3 install -r requirements.txt
+
+  - type: Command
+    name: "Run FastAPI"
+    command: |
+      nohup uvicorn main:app --host 0.0.0.0 --port 8000 &
