@@ -5,14 +5,17 @@ from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from database import Base, engine
 import os
-from dotenv import load_dotenv
 from routes import chat, rag_chat, feedback, upload, rumbleChat, auth
 from services.middleware import RateLimitMiddleware
 from services.rag_llm import create_rag
 from langchain.schema import SystemMessage, HumanMessage
 from fastapi.responses import StreamingResponse
 
-load_dotenv()
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except:
+    pass
 
 HOST = os.getenv("HOST", "127.0.0.1")
 PORT = int(os.getenv("PORT", 8000))

@@ -2,11 +2,14 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from dotenv import load_dotenv
 import os
 
 # .env 파일에서 환경 변수 로드
-load_dotenv()
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except:
+    pass
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 

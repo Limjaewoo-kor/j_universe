@@ -2,7 +2,6 @@ from glob import glob
 import re
 import os
 from typing import AsyncGenerator, Literal
-from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 
 from langchain_core.prompts import PromptTemplate
@@ -15,7 +14,11 @@ from langchain_postgres.vectorstores import PGVector
 
 
 # .env 로드
-load_dotenv()
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except:
+    pass
 
 # Embedding 모델 및 DB 연결
 embeddingModel = OpenAIEmbeddings(model='text-embedding-3-large')
