@@ -1,10 +1,11 @@
 from fastapi import FastAPI
+import os
+print("check______ DATABASE_URL =", os.getenv("DATABASE_URL"))
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from database import Base, engine
-import os
 from routes import chat, rag_chat, feedback, upload, rumbleChat, auth
 from services.middleware import RateLimitMiddleware
 from services.rag_llm import create_rag
