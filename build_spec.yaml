@@ -14,7 +14,8 @@ steps:
     name: Install system dependencies
     command: |
       echo "Installing system dependencies..."
-      dnf install -y postgresql-devel gcc python3-devel
+      apt-get update
+      apt-get install -y libpq-dev gcc python3-dev
   - type: Command
     name: Install Python dependencies
     command: |
