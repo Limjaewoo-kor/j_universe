@@ -25,6 +25,7 @@ import { AuthProvider } from "./contexts/authContext";
 
 import Header from './components/Header';
 import PdfUpload from "./pages/PdfUpload";
+import CalcHelper from "./pages/CalcHelper";
 
 // ✅ 페이지 이동 시 GA 이벤트 전송
 function usePageTracking() {
@@ -108,6 +109,9 @@ function AppWrapper() {
 
         {/* NotFoundPage 경로 추가 */}
         <Route path="*" element={<NotFoundPage />} />
+
+        {/* calc-helper 경로 추가 */}
+        <Route path="/calc-helper" element={<CalcHelper />} />
 
       </Routes>
     </>

@@ -36,12 +36,12 @@ const LoginPage = () => {
       <div className="w-full bg-[#181e29] border-b border-gray-700 px-4 py-3">
         {/* 상단: 로고 */}
         <div className="flex items-center gap-4 mb-2">
-          <h1 className="text-xl font-bold text-blue-400 mr-2">J_Universe</h1>
+          <h1 className="text-xl font-bold text-blue-400 mr-2">J_Uni</h1>
         </div>
         {/* 하단: 네비 */}
         <div className="text-xs text-gray-300">
           <nav className="space-x-2 text-sm text-gray-300">
-            <Link to="/" className="hover:text-blue-400">J_Universe_home</Link>
+            <Link to="/" className="hover:text-blue-400">J_Uni_home</Link>
             <Link to="/home" className="hover:text-blue-400">Malhaejo_home</Link>
             <Link to="/chat" className="hover:text-blue-400">Rumble_Chatbot_home</Link>
           </nav>

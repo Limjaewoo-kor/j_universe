@@ -1,16 +1,15 @@
 from glob import glob
 import re
-from langchain_community.document_loaders import PyPDFLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_openai import OpenAIEmbeddings, ChatOpenAI
-from langchain_chroma import Chroma
-from langchain_core.prompts import PromptTemplate
-from langchain.schema import Document
-from fastapi.concurrency import run_in_threadpool
-from pydantic import BaseModel, Field
-from typing import Literal
 import os
+from typing import AsyncGenerator, Literal
 from dotenv import load_dotenv
+from pydantic import BaseModel, Field
+
+from langchain_core.prompts import PromptTemplate
+from langchain_core.messages import AIMessage
+from langchain.schema import Document
+from langchain_community.document_loaders import PyPDFLoader
+from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_postgres.vectorstores import PGVector
 
 
@@ -46,7 +45,6 @@ rag_generate_system = """
 질문 언어로 반드시 답변하며, context에 같은 아이템의 한글/영문/일어 이름이 다르게 표기되어 있더라도
 질문과 문서의 의미가 같으면 질문 언어로 자연스럽게 번역해서 답변하라.
 
-
 예시:
 - (한국어 질문) 발두르몬의 깃털이 뭐야?
   → 발두르몬의 깃털은 워그레이몬과 메탈가루몬을 오메가몬으로 진화할 때 사용합니다.
@@ -73,7 +71,7 @@ class GradeDocuments(BaseModel):
     binary_score: Literal["yes", "no"] = Field(
         description="문서가 질문과 관련이 있는지 여부를 'yes' 또는 'no'로 평가합니다."
     )
-structured_llm_grader = model.with_structured_output(GradeDocuments)
+
 grader_prompt = PromptTemplate.from_template("""
 당신은 검색된 문서가 사용자 질문과 관련이 있는지 평가하는 평가자입니다.
 문서에 사용자 질문과 관련된 키워드 또는 의미가 포함되어 있으면, 해당 문서를 관련성이 있다고 평가하십시오.
@@ -82,29 +80,37 @@ grader_prompt = PromptTemplate.from_template("""
 Retrieved document: {document}
 User question: {question}
 """)
+
+structured_llm_grader = model.with_structured_output(GradeDocuments)
 retrieval_grader = grader_prompt | structured_llm_grader
 
 
-def _generate_rag_sync(question: str) -> str:
+# 비동기 RAG 응답 스트리밍
+async def generate_rag_answer_stream(question: str) -> AsyncGenerator[str, None]:
     docs = retriever.invoke(question)
     filtered_docs = []
+
     for doc in docs:
-        is_relevant = retrieval_grader.invoke({"question": question, "document": doc.page_content})
-        if is_relevant.binary_score == "yes":
+        result = retrieval_grader.invoke({"question": question, "document": doc.page_content})
+        if result.binary_score == "yes":
             filtered_docs.append(doc)
+
     if not filtered_docs:
-        return "해당 질문과 관련된 정보를 찾을 수 없습니다."
+        yield "해당 질문과 관련된 정보를 찾을 수 없습니다."
+        return
+
     context = "\n\n".join([doc.page_content for doc in filtered_docs])
-    response = rag_chain.invoke({"question": question, "context": context})
-    return getattr(response, "content", str(response)).strip()
+
+    async for chunk in rag_chain.astream({"question": question, "context": context}):
+        if isinstance(chunk, AIMessage):
+            yield chunk.content
+        else:
+            yield str(chunk)
 
 
-async def generate_rag_answer(question: str) -> str:
-    return await run_in_threadpool(_generate_rag_sync, question)
 
-
+# PDF에서 Q/A 블록 추출 및 RAG DB 구축
 def extract_qa_blocks(text):
-    # "Q. ~ A. ~" 블록을 정규식으로 추출
     pattern = r'Q\..*?A\..*?(?=Q\.|$)'
     return re.findall(pattern, text, re.DOTALL)
 
@@ -125,30 +131,3 @@ def create_rag():
     print(f"총 {len(all_chunks)}개의 QA 문서 블록을 저장했습니다.")
 
 
-
-
-# 청크사이즈와 청크 오버랩 기준으로 분할 + Chroma 사용 예시
-# def create_rag() :
-#     # http://localhost:8000/rag-create
-#     pdf_files = glob('./data/*.pdf')
-#
-#     print(pdf_files)
-#     embedding = OpenAIEmbeddings(model='text-embedding-3-large')
-#     persist_directory = './chroma_store'
-#
-#     all_chunks = []
-#     for pdf_path in pdf_files:
-#         loader = PyPDFLoader(pdf_path)
-#         docs = loader.load()
-#
-#         splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=20)
-#         print(splitter)
-#         chunks = splitter.split_documents(docs)
-#         print(chunks)
-#         all_chunks.extend(chunks)
-#
-#     vectorstore = Chroma.from_documents(
-#         documents=all_chunks,
-#         embedding=embedding,
-#         persist_directory=persist_directory
-#     )

@@ -15,10 +15,10 @@ const Header = ({ toggleTheme, theme }) => {
   return (
     <header className="flex flex-col md:flex-row justify-between items-center px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
       <div className="mb-2 md:mb-0 text-center md:text-left">
-        <h1 className="text-lg sm:text-xl font-bold text-blue-600 dark:text-blue-300">말해조 🗣️</h1>
+        <h1 className="text-lg sm:text-xl font-bold text-blue-600 dark:text-blue-300">J_Uni 말해조 🗣️</h1>
         <nav className="mt-1 flex flex-col md:flex-row gap-2 md:gap-4 text-sm text-gray-700 dark:text-gray-300 items-center">
-          <Link to="/" className="hover:text-blue-400">J_Universe_home</Link>
-          <Link to="/home" className="hover:text-blue-400">Malhaejo_home</Link>
+          <Link to="/" className="hover:text-blue-400">J_Uni_home</Link>
+          <Link to="/home" className="hover:text-blue-400">말해조 홈</Link>
           <Link to="/history" className="hover:text-blue-400">history</Link>
           <Link to="/templates" className="hover:text-blue-400">template</Link>
           {isLoggedIn && (

@@ -5,7 +5,7 @@ import Buymeacoffee from "../components/buymeacoffee";
 const menuList = [
   { label: "말해조(Malhaejo)", to: "/home" },
   { label: "Rumble Chatbot", to: "/chat" },
-  { label: "Empty", to: "/" },
+  { label: "계산해(CalcForMe)", to: "/calc-helper" },
   { label: "Empty", to: "/" },
   { label: "Empty", to: "/" },
   { label: "Empty", to: "/" },

@@ -55,11 +55,11 @@ function InputPage() {
               fontWeight: "bold",
               textAlign: "center"
           }}>
-              일정 시간 사용하지 않으면 간혹 챗봇이 동작하지 않는 경우가 있습니다.<br/>
-              새로고침 후 다시 시도해 주세요.
+              일정 시간 사용하지 않으면 간혹 기능이 동작하지 않는 경우가 있습니다.<br/>
+              약 2~3분 후에 화면을 새로고침 하신 후 다시 시도해 주세요.
               <br/>
-              If you don't use it for a certain period of time, the chatbot may not work. <br/>
-              Please refresh and try again.
+              If you do not use it for a certain period of time, the function may not work occasionally.<br/>
+              Please refresh the screen after about 2-3 minutes and try again.
           </p>
       </div>
   );

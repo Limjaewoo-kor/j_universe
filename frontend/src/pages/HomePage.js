@@ -14,8 +14,6 @@ export default function HomePage() {
   return (
       <div
           className="bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800 min-h-screen px-2 sm:px-4 py-8 sm:py-12 text-gray-800 dark:text-white">
-
-        {/* 🧠 Hero Section */}
         <section className="flex flex-col md:flex-row items-center justify-between max-w-7xl mx-auto mb-12 md:mb-16">
           {/* 이미지 왼쪽 */}
           <div className="w-full md:w-1/2 mb-8 md:mb-0 flex justify-center">
@@ -100,6 +98,18 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+        <p style={{
+          fontSize: "0.9em",
+          color: "gray",
+          fontWeight: "bold",
+          textAlign: "center"
+        }}>
+          일정 시간 사용하지 않으면 간혹 기능이 동작하지 않는 경우가 있습니다.<br/>
+          약 2~3분 후에 화면을 새로고침 하신 후 다시 시도해 주세요.
+          <br/>
+          If you do not use it for a certain period of time, the function may not work occasionally.<br/>
+          Please refresh the screen after about 2-3 minutes and try again.
+        </p>
         <div style={{textAlign: "center", padding: '30px 20px'}}>
           {/* 콘텐츠 */}
           <Buymeacoffee/>

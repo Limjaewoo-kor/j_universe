@@ -5,7 +5,7 @@ import ChatInput from '../components/chat/ChatInput';
 import RagChatBox from '../components/chat/RagChatBox';
 import RagChatInput from '../components/chat/RagChatInput';
 import FeedbackForm from '../components/FeedbackForm';
-import { askRagChat } from "../api/ragChat";
+import { askRagChatStream } from "../api/ragChat";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/authContext";
 import Buymeacoffee from '../components/buymeacoffee';
@@ -65,8 +65,18 @@ const ChatPage = () => {
   const sendRagMessage = async (msg) => {
     if (!msg.trim()) return;
     setRagMessages((prev) => [...prev, { role: "user", content: msg }]);
-    const answer = await askRagChat(msg);
-    setRagMessages((prev) => [...prev, { role: "bot", content: answer }]);
+
+    let currentAnswer = "";
+    setRagMessages((prev) => [...prev, { role: "bot", content: "" }]);
+
+    await askRagChatStream(msg, (chunk) => {
+      currentAnswer = chunk;
+      setRagMessages((prev) => {
+        const updated = [...prev];
+        updated[updated.length - 1] = { role: "bot", content: currentAnswer };
+        return updated;
+      });
+    });
   };
 
   const handleLogout = () => {
@@ -80,9 +90,9 @@ const ChatPage = () => {
         <header
             className="flex flex-col md:flex-row justify-between items-center px-4 py-4 border-b bg-white dark:bg-gray-800">
           <div className="text-center md:text-left mb-4 md:mb-0">
-            <h1 className="text-xl font-bold text-blue-600 dark:text-blue-300">Rumble Chatbot – 비공식 가이드</h1>
+            <h1 className="text-xl font-bold text-blue-600 dark:text-blue-300">J_Uni Rumble Chatbot – 비공식 가이드</h1>
             <nav className="mt-2 text-sm">
-              <Link to="/" className="hover:text-blue-400">J_Universe_home</Link>
+              <Link to="/" className="hover:text-blue-400">J_Uni_home</Link>
               <span className="mx-2">|</span>
               <Link to="/chat" className="hover:text-blue-400">Rumble_Chatbot_home</Link>
             </nav>
@@ -178,11 +188,11 @@ const ChatPage = () => {
           fontWeight: "bold",
           textAlign: "center"
         }}>
-          일정 시간 사용하지 않으면 간혹 챗봇이 동작하지 않는 경우가 있습니다.<br/>
-          새로고침 후 다시 시도해 주세요.
+          일정 시간 사용하지 않으면 간혹 기능이 동작하지 않는 경우가 있습니다.<br/>
+          약 2~3분 후에 화면을 새로고침 하신 후 다시 시도해 주세요.
           <br/>
-          If you don't use it for a certain period of time, the chatbot may not work. <br/>
-          Please refresh and try again.
+          If you do not use it for a certain period of time, the function may not work occasionally.<br/>
+          Please refresh the screen after about 2-3 minutes and try again.
         </p>
         <div style={{textAlign: "center", padding: '30px 20px'}}>
           {/* 콘텐츠 */}
