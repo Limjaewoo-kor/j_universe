@@ -6,6 +6,7 @@ import ExchangeCalcTab from './tabs/ExchangeCalcTab';
 import UnitConvertTab from './tabs/UnitConvertTab';
 import {Link, useNavigate} from "react-router-dom";
 import {useAuth} from "../contexts/authContext";
+import Buymeacoffee from "../components/buymeacoffee";
 
 const CalcHelperPage = () => {
   const [tab, setTab] = useState('basic');
@@ -109,6 +110,11 @@ const CalcHelperPage = () => {
           If you do not use it for a certain period of time, the function may not work occasionally.<br/>
           Please refresh the screen after about 2-3 minutes and try again.
         </p>
+
+        <div style={{textAlign: "center", padding: '30px 20px'}}>
+          {/* 콘텐츠 */}
+          <Buymeacoffee/>
+        </div>
       </div>
   );
 };
