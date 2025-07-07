@@ -11,18 +11,12 @@ env:
 
 steps:
   - type: Command
-    name: Install system dependencies
-    command: |
-      echo "Installing system dependencies..."
-      apt-get update
-      apt-get install -y libpq-dev gcc python3-dev
-  - type: Command
     name: Install Python dependencies
     command: |
       pip install --upgrade pip
       pip install -r requirements.txt
+
   - type: Command
     name: Run FastAPI
     command: |
-      echo "Starting app..."
-      python main.py
+      uvicorn main:app --host 0.0.0.0 --port 8000
