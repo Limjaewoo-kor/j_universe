@@ -1,17 +1,27 @@
 version: 0.1
 component: build
-timeoutInSeconds: 10000
+timeoutInSeconds: 3600
 shell: bash
+
+env:
+  variables:
+    DATABASE_URL: ${DATABASE_URL}
+    SECRET_KEY: ${SECRET_KEY}
+    OPENAI_API_KEY: ${OPENAI_API_KEY}
 
 steps:
   - type: Command
-    name: "Install dependencies"
+    name: Install system dependencies
     command: |
-      sudo apt update
-      sudo apt install -y python3-pip
-      pip3 install -r requirements.txt
-
+      echo "Installing system dependencies..."
+      dnf install -y postgresql-devel gcc python3-devel
   - type: Command
-    name: "Run FastAPI"
+    name: Install Python dependencies
     command: |
-      nohup uvicorn main:app --host 0.0.0.0 --port 8000 &
+      pip install --upgrade pip
+      pip install -r requirements.txt
+  - type: Command
+    name: Run FastAPI
+    command: |
+      echo "Starting app..."
+      python main.py
