@@ -9,6 +9,7 @@ import { askRagChatStream } from "../api/ragChat";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/authContext";
 import Buymeacoffee from '../components/buymeacoffee';
+import { checkLocalGptLimit, getRemainingGptCalls } from "../utils/checkLocalGptLimit";
 
 const ChatPage = () => {
   const navigate = useNavigate();
@@ -20,6 +21,12 @@ const ChatPage = () => {
   const socketRef = useRef(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:8000";
+  const [remainingCalls, setRemainingCalls] = useState(10);
+
+  useEffect(() => {
+    setRemainingCalls(getRemainingGptCalls());
+  }, []);
+
 
   useEffect(() => {
     socketRef.current = createWebSocketConnection((msg) => {
@@ -64,19 +71,35 @@ const ChatPage = () => {
 
   const sendRagMessage = async (msg) => {
     if (!msg.trim()) return;
+
+    if (!checkLocalGptLimit()) {
+      alert("오늘의 무료 GPT 사용 횟수를 모두 사용하셨습니다.\n내일 다시 이용해 주세요.");
+      return;
+    }
+    setRemainingCalls(getRemainingGptCalls());  // 호출 성공 시 갱신
+
+
     setRagMessages((prev) => [...prev, { role: "user", content: msg }]);
-
     let currentAnswer = "";
-    setRagMessages((prev) => [...prev, { role: "bot", content: "" }]);
 
-    await askRagChatStream(msg, (chunk) => {
-      currentAnswer = chunk;
-      setRagMessages((prev) => {
-        const updated = [...prev];
-        updated[updated.length - 1] = { role: "bot", content: currentAnswer };
-        return updated;
-      });
-    });
+    try{
+        setRagMessages((prev) => [...prev, { role: "bot", content: "" }]);
+        await askRagChatStream(msg, (chunk) => {
+          currentAnswer = chunk;
+          setRagMessages((prev) => {
+            const updated = [...prev];
+            updated[updated.length - 1] = { role: "bot", content: currentAnswer };
+            return updated;
+          });
+        });
+    }catch (err){
+      if (err.message.includes("429")) {
+          alert("서버 기준 일일 GPT 사용 횟수를 초과하였습니다.\n내일 다시 이용해 주세요.");
+        } else {
+          alert("사용 횟수를 초과하였거나 서버와의 연결에 실패했습니다.");
+        }
+      console.error(err);
+    }
   };
 
   const handleLogout = () => {
@@ -158,7 +181,7 @@ const ChatPage = () => {
               Rumble Chatbot
             </h2>
             <p className="text-sm mb-4 text-gray-600 dark:text-gray-300">
-              챗봇에 추가하실 정보가 있다면 Feedback을 작성해주세요.<br/>
+              가이드봇에 추가하실 정보가 있다면 Feedback을 작성해주세요.<br/>
               If you have information to add, please write feedback.
             </p>
             <RagChatBox messages={ragMessages}/>
@@ -180,6 +203,11 @@ const ChatPage = () => {
           experience. <br/>
           The content consists of information compiled through direct gameplay and is not affiliated with the official
           developer.
+        </p>
+        <br/>
+        {/* 남은 GPT 횟수 표시 */}
+        <p className="text-sm mb-2 text-yellow-500 font-semibold text-center">
+          📌 오늘 남은 가이드봇 사용 가능 횟수: {remainingCalls}회
         </p>
         <br/>
         <p style={{

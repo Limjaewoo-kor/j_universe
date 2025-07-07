@@ -42,7 +42,7 @@ const FeedbackForm = ({ onClose }) => {
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder="챗봇과 관련된 피드백은 질문/답변 형식으로 작성해주세요. Please provide feedback regarding the chatbot in a question/answer format."
+            placeholder="가이드봇과 관련된 피드백은 질문/답변 형식으로 작성해주세요. Please provide feedback regarding the chatbot in a question/answer format."
             required
             className="mb-2 w-full p-2 border rounded text-black min-h-[120px] sm:min-h-[200px]"
           />

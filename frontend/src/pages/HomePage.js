@@ -1,15 +1,19 @@
 // HomePage.js
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import { useNavigate } from 'react-router-dom';
 import Buymeacoffee from '../components/buymeacoffee';
 import heroImage from '../assets/hero-writing.svg'; // 이미지 파일 위치
+import { checkLocalGptLimit, getRemainingGptCalls } from "../utils/checkLocalGptLimit";
 
 export default function HomePage() {
   const navigate = useNavigate();
-
+  const [remainingCalls, setRemainingCalls] = useState(10);
   const handleStartClick = () => {
     navigate('/purpose');
   };
+  useEffect(() => {
+    setRemainingCalls(getRemainingGptCalls());
+  }, []);
 
   return (
       <div
@@ -98,6 +102,11 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+        {/* 남은 GPT 횟수 표시 */}
+        <p className="text-sm mb-2 text-yellow-500 font-semibold text-center">
+          📌 오늘 남은 문장 생성 사용 가능 횟수: {remainingCalls}회
+        </p>
+        <br/>
         <p style={{
           fontSize: "0.9em",
           color: "gray",

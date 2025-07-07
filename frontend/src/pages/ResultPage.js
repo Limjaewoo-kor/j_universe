@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { UserInputContext } from '../contexts/UserInputContext';
 import { generatePoliteMessage } from '../api/gptService';
 import useClipboard from '../hooks/useClipboard';
+import { checkLocalGptLimit, getRemainingGptCalls } from "../utils/checkLocalGptLimit";
 import ReactGA from 'react-ga4';
 
 function ResultPage() {
@@ -16,8 +17,20 @@ function ResultPage() {
 
   const [loading, setLoading] = useState(false);
   const [copied, copyToClipboard] = useClipboard();
+  const [remainingCalls, setRemainingCalls] = useState(10);
+
+  useEffect(() => {
+    setRemainingCalls(getRemainingGptCalls());
+  }, []);
 
   const fetchResult = async (customTone = tone) => {
+
+    if (!checkLocalGptLimit()) {
+      alert("오늘의 무료 GPT 사용 횟수를 모두 사용하셨습니다.\n내일 다시 이용해 주세요.");
+      return;
+    }
+    setRemainingCalls(getRemainingGptCalls());  // 호출 성공 시 갱신
+
     setLoading(true);
 
     // ✅ GA 이벤트 전송
@@ -36,8 +49,13 @@ function ResultPage() {
       setTone(customTone);
       setResultText(response);
     } catch (error) {
-      console.error('AI 응답 실패:', error);
-      setResultText('⚠️ 문장 생성에 실패했습니다.');
+      if (error.message.includes("429")) {
+        alert("서버 기준 일일 사용 횟수를 초과하였습니다.\n내일 다시 이용해 주세요.");
+        setResultText("요청 횟수를 초과하여 문장을 생성할 수 없습니다.");
+      } else {
+        alert("사용 횟수를 초과하였거나 서버와의 연결에 실패했습니다.");
+        setResultText("문장 생성에 실패했습니다.");
+      }
     } finally {
       setLoading(false);
     }
@@ -153,15 +171,20 @@ return (
             onClick={handleSaveToHistory}
             className="bg-green-500 hover:bg-green-600 text-white py-2 px-6 rounded-xl shadow ring-2 ring-green-300"
         >
-          💾 히스토리에 저장
+          히스토리에 저장
         </button>
         <button
             onClick={handleSaveTemplate}
             className="bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-6 rounded-xl shadow ring-2 ring-yellow-300"
         >
-          📌 템플릿으로 저장
+          템플릿으로 저장
         </button>
       </div>
+      <br/>
+      {/* 남은 GPT 횟수 표시 */}
+      <p className="text-sm mb-2 text-yellow-500 font-semibold text-center">
+        📌 오늘 남은 문장 생성 사용 가능 횟수: {remainingCalls}회
+      </p>
       <br/>
       <p style={{
         fontSize: "0.9em",

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import {checkLocalGptLimit} from "../../utils/checkLocalGptLimit";
 
 const InterestCalcTab = () => {
   const [input, setInput] = useState('');
@@ -7,30 +8,46 @@ const InterestCalcTab = () => {
   const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
   const handleSubmit = async () => {
-    setResult('');
-    setLoading(true);
-
-    const response = await fetch(`${API_BASE_URL}/calculate/interest`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question: input }),
-    });
-
-    if (!response.body) {
-      setResult('응답이 없습니다.');
-      setLoading(false);
+    // 호출 제한 체크
+    if (!checkLocalGptLimit()) {
+      alert("오늘의 무료 계산 요청 횟수를 모두 사용하셨습니다.\n내일 다시 이용해 주세요.");
       return;
     }
 
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder('utf-8');
+    setResult('');
+    setLoading(true);
+    try{
+        const response = await fetch(`${API_BASE_URL}/calculate/interest`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question: input }),
+        });
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
+        if (response.status === 429) {
+              alert("서버 기준 일일 요청 횟수를 초과하였습니다.\n내일 다시 이용해 주세요.");
+              setLoading(false);
+              return;
+        }
 
-      const chunk = decoder.decode(value, { stream: true });
-      setResult(prev => prev + chunk);
+        if (!response.body) {
+          setResult('응답이 없습니다.');
+          setLoading(false);
+          return;
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder('utf-8');
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value, { stream: true });
+          setResult(prev => prev + chunk);
+        }
+    }catch (error){
+        console.error("fetch 오류:", error);
+        alert("사용 횟수를 초과하였거나 서버와의 연결에 실패했습니다.");
     }
 
     setLoading(false);

@@ -7,11 +7,20 @@ import UnitConvertTab from './tabs/UnitConvertTab';
 import {Link, useNavigate} from "react-router-dom";
 import {useAuth} from "../contexts/authContext";
 import Buymeacoffee from "../components/buymeacoffee";
+import { getRemainingGptCalls } from '../utils/checkLocalGptLimit';
+import { useEffect } from 'react';
+
+
 
 const CalcHelperPage = () => {
   const [tab, setTab] = useState('basic');
   const { isLoggedIn, setIsLoggedIn } = useAuth();
   const navigate = useNavigate();
+  const [remainingCalls, setRemainingCalls] = useState(10);
+
+    useEffect(() => {
+    setRemainingCalls(getRemainingGptCalls());
+  }, [tab]); // 탭 변경 시에도 갱신되도록
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -97,6 +106,10 @@ const CalcHelperPage = () => {
           </div>
         </div>
         <br/>
+        {/* 호출 횟수 표시 */}
+        <p className="text-sm text-yellow-300 mb-4 font-semibold text-center">
+          📌 오늘 남은 계산 가능 횟수: {remainingCalls}회
+        </p>
         <br/>
         <p style={{
           fontSize: "0.9em",

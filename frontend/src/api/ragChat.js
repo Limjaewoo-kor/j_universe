@@ -8,6 +8,14 @@ export async function askRagChatStream(question, onChunk) {
     body: JSON.stringify({ question }),
   });
 
+  if (response.status === 429) {
+    throw new Error("429: Too many requests");
+  }
+
+  if (!response.ok) {
+    throw new Error(`서버 오류: ${response.status}`);
+  }
+
   if (!response.body) {
     throw new Error("No response body for stream");
   }

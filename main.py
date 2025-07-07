@@ -7,6 +7,7 @@ from database import Base, engine
 import os
 from dotenv import load_dotenv
 from routes import chat, rag_chat, feedback, upload, rumbleChat, auth
+from services.middleware import RateLimitMiddleware
 from services.rag_llm import create_rag
 from langchain.schema import SystemMessage, HumanMessage
 from fastapi.responses import StreamingResponse
@@ -35,16 +36,19 @@ app.include_router(rumbleChat.router)
 # CORS 설정 (로컬 React 연동용)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173",
-                   "http://localhost:3000",
-                   "https://j-universe.vercel.app"
-                   "https://j-uni.com",
-                   "https://www.j-uni.com",
-                   ],  # Vite일 경우
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "https://j-universe.vercel.app",
+        "https://j-uni.com",
+        "https://www.j-uni.com",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.add_middleware(RateLimitMiddleware)
 
 # GPT 모델 설정
 llm = ChatOpenAI(
