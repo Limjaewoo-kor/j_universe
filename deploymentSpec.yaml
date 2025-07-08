@@ -1,6 +1,6 @@
 version: "1.0"
 steps:
-  - type: Command
+  - stepType: Command
     name: Run Application
     timeoutInSeconds: 600
     command: |
