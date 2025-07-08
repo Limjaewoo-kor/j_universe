@@ -17,3 +17,8 @@ steps:
     command: |
       mkdir -p artifacts # 이 폴더를 생성하고
       zip -r artifacts/app.zip . # 이곳에 zip 파일을 만듭니다.
+
+outputArtifacts:
+  - name: app.zip
+    type: BINARY
+    location: artifacts/app.zip
