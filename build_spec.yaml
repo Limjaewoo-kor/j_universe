@@ -1,10 +1,11 @@
+version: 0.1
 component: build
 timeoutInSeconds: 3600
 shell: bash
 
 steps:
   - type: Command
-    name: Install Python dependencies
+    name: Set up Python virtual environment
     command: |
       python3 -m venv venv
       . venv/bin/activate
@@ -12,7 +13,7 @@ steps:
       pip install -r requirements.txt
 
   - type: Command
-    name: Package application for deployment
+    name: Package application
     command: |
       mkdir -p artifacts
       zip -r artifacts/app.zip .
