@@ -17,7 +17,7 @@ steps:
     command: |
       mkdir -p artifacts
       chmod +x run.sh
-      zip -r artifacts/app.zip . -x "*.venv/*" "*.git/*" "__pycache__/*" "*.pyc"
+      zip -X -r artifacts/app.zip . -x "*.venv/*" "*.git/*" "__pycache__/*" "*.pyc"
 
 outputArtifacts:
   - name: app_zip
