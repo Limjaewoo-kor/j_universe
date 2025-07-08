@@ -23,4 +23,3 @@ outputArtifacts:
   - name: app_zip
     type: BINARY
     location: artifacts/app.zip
-    version: v20250708_2021
