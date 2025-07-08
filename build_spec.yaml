@@ -23,5 +23,4 @@ outputArtifacts:
   - name: app_zip
     type: BINARY
     location: artifacts/app.zip
-    version: v{{timestamp}}  # 버전을 타임스탬프로 자동화하면 중복 없음
-
+    version: v20250708_2021
