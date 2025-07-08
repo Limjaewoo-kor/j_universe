@@ -7,4 +7,4 @@ steps:
       unzip artifacts/app.zip -d /tmp/deploy_dir
       cd /tmp/deploy_dir
       chmod +x run.sh
-      ./run.sh
+      nohup ./run.sh > deploy.log 2>&1 &
