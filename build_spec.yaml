@@ -16,7 +16,7 @@ steps:
     name: Package application
     command: |
       mkdir -p artifacts # 이 폴더를 생성하고
-      chmod +x run.sh  # 실행 권한 부여
+      cp deploymentSpec.yaml artifacts/  # ✅ 명시적으로 포함
       zip -r artifacts/app.zip . # 이곳에 zip 파일을 만듭니다.
 
 outputArtifacts:

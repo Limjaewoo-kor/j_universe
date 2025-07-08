@@ -1,0 +1,10 @@
+version: "1.0"
+steps:
+  - type: Command
+    name: Run Application
+    timeoutInSeconds: 600
+    command: |
+      unzip artifacts/app.zip -d /tmp/deploy_dir
+      cd /tmp/deploy_dir
+      chmod +x run.sh
+      ./run.sh
