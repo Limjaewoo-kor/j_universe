@@ -1,12 +1,20 @@
 version: 0.1
-component: build
-timeoutInSeconds: 3600
-shell: bash
-
-
 steps:
   - type: Command
     name: Install Python dependencies
     command: |
+      python3 -m venv venv
+      . venv/bin/activate
       pip install --upgrade pip
       pip install -r requirements.txt
+
+  - type: Command
+    name: Package application for deployment
+    command: |
+      mkdir -p artifacts
+      zip -r artifacts/app.zip .
+
+artifacts:
+  output:
+    files:
+      - artifacts/app.zip
