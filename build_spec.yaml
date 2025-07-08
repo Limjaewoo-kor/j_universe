@@ -17,9 +17,7 @@ steps:
     command: |
       mkdir -p artifacts
       chmod +x run.sh
-      cp deploymentSpec.yaml run.sh requirements.txt main.py artifacts/
-      cd artifacts
-      zip -r app.zip .  # ✅ 루트에 정확히 위치하게 압축
+      zip -r artifacts/app.zip . -x "*.venv/*" "*.git/*" "__pycache__/*" "*.pyc"
 
 outputArtifacts:
   - name: app_zip
