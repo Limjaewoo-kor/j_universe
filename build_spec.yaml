@@ -15,10 +15,5 @@ steps:
   - type: Command
     name: Package application
     command: |
-      mkdir -p artifacts
-      zip -r artifacts/app.zip .
-
-artifacts:
-  output:
-    files:
-      - artifacts/app.zip
+      mkdir -p artifacts # 이 폴더를 생성하고
+      zip -r artifacts/app.zip . # 이곳에 zip 파일을 만듭니다.
