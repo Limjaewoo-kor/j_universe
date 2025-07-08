@@ -1,10 +1,11 @@
-version: "1.0"
+version: 0.1
+component: deployment
+timeoutInSeconds: 300
+runAsUser: opc
+
 steps:
   - type: Command
-    name: Run Application
-    timeoutInSeconds: 600
+    name: Start Application
     command: |
-      unzip artifacts/app.zip -d /tmp/deploy_dir
-      cd /tmp/deploy_dir
       chmod +x run.sh
       ./run.sh

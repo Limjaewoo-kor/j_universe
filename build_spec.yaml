@@ -15,9 +15,11 @@ steps:
   - type: Command
     name: Package application
     command: |
-      mkdir -p artifacts # 이 폴더를 생성하고
-      cp deploymentSpec.yaml artifacts/  # ✅ 명시적으로 포함
-      zip -r artifacts/app.zip . # 이곳에 zip 파일을 만듭니다.
+      mkdir -p artifacts
+      chmod +x run.sh
+      cp deploymentSpec.yaml run.sh requirements.txt main.py artifacts/
+      cd artifacts
+      zip -r app.zip .  # ✅ 루트에 정확히 위치하게 압축
 
 outputArtifacts:
   - name: app_zip
