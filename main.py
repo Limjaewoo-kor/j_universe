@@ -1,16 +1,15 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, HTTPException
 import os
-print("check______ DATABASE_URL =", os.getenv("DATABASE_URL"))
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from database import Base, engine
 from routes import chat, rag_chat, feedback, upload, rumbleChat, auth
-from services.middleware import RateLimitMiddleware
+from services.middleware import rate_limit_middleware
 from services.rag_llm import create_rag
 from langchain.schema import SystemMessage, HumanMessage
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, JSONResponse
 
 try:
     from dotenv import load_dotenv
@@ -52,7 +51,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.add_middleware(RateLimitMiddleware)
+app.middleware("http")(rate_limit_middleware)
+
+
+@app.exception_handler(HTTPException)
+async def custom_http_exception_handler(request: Request, exc: HTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "success": False,
+            "error_code": exc.status_code,
+            "error_message": exc.detail
+        }
+    )
+
 
 # GPT 모델 설정
 llm = ChatOpenAI(
