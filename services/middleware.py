@@ -9,7 +9,7 @@ async def rate_limit_middleware(request: Request, call_next):
     ip = request.client.host
     now = datetime.now()
     window = timedelta(hours=24)
-    max_calls = 25
+    max_calls = 15
 
     logs = ip_call_logs.get(ip, [])
     logs = [t for t in logs if now - t < window]

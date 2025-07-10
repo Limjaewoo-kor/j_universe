@@ -108,7 +108,7 @@ const CalcHelperPage = () => {
         <br/>
         {/* 호출 횟수 표시 */}
         <p className="text-sm text-yellow-300 mb-4 font-semibold text-center">
-          📌 오늘 남은 계산 가능 횟수: {remainingCalls}회
+          📌 오늘 남은 계산 가능 횟수(count): {remainingCalls}회
         </p>
         <br/>
         <p style={{

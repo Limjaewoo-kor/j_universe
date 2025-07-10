@@ -64,10 +64,11 @@ const UnitConvertTab = () => {
             onChange={e => setInput(e.target.value)}
         />
         <p className="text-sm text-gray-400 mt-2">
-          - 무게: 파운드, 킬로그램<br/>
-          - 길이: 마일, 킬로미터<br/>
-          - 온도: 섭씨, 화씨<br/>
-          - 부피: 갤런, 리터 등<br/>
+            - 무게: 파운드, 킬로그램<br/>
+            - 길이: 마일, 킬로미터<br/>
+            - 온도: 섭씨, 화씨<br/>
+            - 부피: 갤런, 리터 등<br/>
+            - 예: 3마일은 몇 km야?<br/>
         </p>
         <br/>
         <button

@@ -64,7 +64,8 @@ const ExchangeCalcTab = () => {
             onChange={e => setInput(e.target.value)}
         />
         <p className="text-sm text-gray-400 mt-2">
-          환율을 포함해서 입력하세요. (기본값은 달러당 1350원입니다.)
+            - 환율을 포함해서 입력하세요. (기본값은 달러당 1350원입니다.)<br/>
+            - 예: 150달러는 환율 1320원 기준으로 얼마야?"
         </p>
         <br/>
         <button

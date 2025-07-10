@@ -207,7 +207,7 @@ const ChatPage = () => {
         <br/>
         {/* 남은 GPT 횟수 표시 */}
         <p className="text-sm mb-2 text-yellow-500 font-semibold text-center">
-          📌 오늘 남은 가이드봇 사용 가능 횟수: {remainingCalls}회
+          📌 오늘 남은 가이드봇 사용 가능 횟수(count): {remainingCalls}회
         </p>
         <br/>
         <p style={{

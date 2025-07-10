@@ -1,6 +1,6 @@
 // src/utils/checkLocalGptLimit.js
 export const checkLocalGptLimit = () => {
-  const max = 20; // 1일 최대 호출 수
+  const max = 5; // 1일 최대 호출 수
   const today = new Date().toDateString();
   const saved = JSON.parse(localStorage.getItem("gptLimit") || "{}");
 
@@ -20,7 +20,7 @@ export const checkLocalGptLimit = () => {
 
 
 export const getRemainingGptCalls = () => {
-  const max = 20;
+  const max = 5;
   const today = new Date().toDateString();
   const saved = JSON.parse(localStorage.getItem("gptLimit") || "{}");
   if (saved.date !== today) return max;

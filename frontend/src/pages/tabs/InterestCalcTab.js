@@ -64,7 +64,8 @@ const InterestCalcTab = () => {
             onChange={e => setInput(e.target.value)}
         />
         <p className="text-sm text-gray-400 mt-2">
-          이자는 단리 기준입니다.
+            - 이자는 단리 기준입니다.<br/>
+            - 예: 연 3%로 2년간 500만원 예금하면?
         </p>
         <br/>
         <button
