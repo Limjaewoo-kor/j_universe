@@ -5,11 +5,12 @@ from pydantic import BaseModel
 from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from database import Base, engine
-from routes import chat, rag_chat, feedback, upload, rumbleChat, auth
-from services.middleware import rate_limit_middleware
+from routes import chat, rag_chat, feedback, upload, rumbleChat, auth, gpt_usage
+# from services.middleware import RateLimitMiddleware
 from services.rag_llm import create_rag
 from langchain.schema import SystemMessage, HumanMessage
 from fastapi.responses import StreamingResponse, JSONResponse
+# from auth.auth_middleware import AuthMiddleware
 
 try:
     from dotenv import load_dotenv
@@ -23,18 +24,10 @@ DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 openai_api_key = os.getenv("OPENAI_API_KEY")
 DATABASE_URL = os.getenv("DATABASE_URL")
 
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-Base.metadata.create_all(bind=engine)
-app.include_router(auth.router)
-#rumbleChat
-app.include_router(chat.router)
-app.include_router(rag_chat.router)
-app.include_router(feedback.router)
-app.include_router(upload.router)
-app.include_router(rumbleChat.router)
-#Calc
 
 # CORS 설정 (로컬 React 연동용)
 app.add_middleware(
@@ -51,8 +44,102 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.middleware("http")(rate_limit_middleware)
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
+from datetime import datetime, timedelta, date
+from sqlalchemy.orm import Session
+from database import get_db
+from models.user import User
+from models.gpt_usage import GptUsage
+from auth.jwt_handler import decode_access_token
+from services.middleware import ip_call_logs, GPT_PROTECTED_PATHS
 
+
+# ── 2) 인증 + 한도체크 미들웨어 (통합) ──
+@app.middleware("http")
+async def auth_and_rate_limit(request: Request, call_next):
+    # 1) 인증
+    request.state.user = None
+    auth_hdr = request.headers.get("Authorization", "")
+    if auth_hdr.startswith("Bearer "):
+        token = auth_hdr.split(" ", 1)[1]
+        try:
+            email = decode_access_token(token)
+            if email:
+                db: Session = next(get_db())
+                user = db.query(User).filter(User.email == email).first()
+                request.state.user = user
+        except Exception:
+            # 토큰이 잘못되면 무시하고 비회원 취급
+            pass
+
+    # 2) CORS preflight / 비보호 경로는 그대로 통과
+    if request.method == "OPTIONS" or request.url.path not in GPT_PROTECTED_PATHS:
+        return await call_next(request)
+
+    # 3) 한도 체크
+    user = request.state.user
+    now = datetime.now()
+    today = date.today()
+    db: Session = next(get_db())
+
+    if user:
+        # 회원 로직
+        usage = db.query(GptUsage).filter_by(user_id=user.id).first()
+        if not usage:
+            usage = GptUsage(user_id=user.id, last_used=today, usage_count=1)
+            db.add(usage)
+        else:
+            if usage.last_used != today:
+                usage.last_used = today
+                usage.usage_count = 1
+            else:
+                if usage.usage_count >= usage.daily_limit:
+                    return JSONResponse(
+                        status_code=429,
+                        content={
+                            "success": False,
+                            "error_code": 429,
+                            "error_message": "일일 GPT 사용 한도를 초과했습니다."
+                        },
+                        headers={"Access-Control-Allow-Origin": "http://localhost:3000"}
+                    )
+                usage.usage_count += 1
+        db.commit()
+    else:
+        # 비회원 로직
+        ip = request.client.host
+        window = timedelta(hours=24)
+        max_calls = 10
+        logs = ip_call_logs.get(ip, [])
+        logs = [t for t in logs if now - t < window]
+        if len(logs) >= max_calls:
+            return JSONResponse(
+                status_code=429,
+                content={
+                    "success": False,
+                    "error_code": 429,
+                    "error_message": "비회원 GPT 사용 한도를 초과했습니다."
+                },
+                headers={"Access-Control-Allow-Origin": "http://localhost:3000"}
+            )
+        logs.append(now)
+        ip_call_logs[ip] = logs
+
+    # 4) 정상 요청
+    return await call_next(request)
+
+
+app.include_router(auth.router)
+#rumbleChat
+app.include_router(chat.router)
+app.include_router(rag_chat.router)
+app.include_router(feedback.router)
+app.include_router(upload.router)
+app.include_router(rumbleChat.router)
+app.include_router(gpt_usage.router)
+#Calc
 
 @app.exception_handler(HTTPException)
 async def custom_http_exception_handler(request: Request, exc: HTTPException):

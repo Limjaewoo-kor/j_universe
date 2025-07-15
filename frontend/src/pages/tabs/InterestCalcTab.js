@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import {checkLocalGptLimit} from "../../utils/checkLocalGptLimit";
 
 const InterestCalcTab = () => {
   const [input, setInput] = useState('');
@@ -8,18 +7,19 @@ const InterestCalcTab = () => {
   const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
   const handleSubmit = async () => {
-    // 호출 제한 체크
-    if (!checkLocalGptLimit()) {
-      alert("오늘의 무료 계산 요청 횟수를 모두 사용하셨습니다.\n내일 다시 이용해 주세요.");
-      return;
-    }
 
     setResult('');
     setLoading(true);
     try{
+        const token = localStorage.getItem('token');
         const response = await fetch(`${API_BASE_URL}/calculate/interest`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+           headers: {
+            'Content-Type': 'application/json',
+             'Authorization': token
+             ? `Bearer ${token}`
+             : ''
+          },
           body: JSON.stringify({ question: input }),
         });
 

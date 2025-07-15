@@ -1,6 +1,5 @@
 // tabs/BasicCalcTab.js
 import React, { useState } from 'react';
-import { checkLocalGptLimit } from '../../utils/checkLocalGptLimit';
 
 const BasicCalcTab = () => {
   const [input, setInput] = useState('');
@@ -8,19 +7,21 @@ const BasicCalcTab = () => {
   const [loading, setLoading] = useState(false);
   const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
-  const handleSubmit = async () => {
-    // 호출 제한 체크
-    if (!checkLocalGptLimit()) {
-      alert("오늘의 무료 계산 요청 횟수를 모두 사용하셨습니다.\n내일 다시 이용해 주세요.");
-      return;
-    }
+    const handleSubmit = async () => {
 
-    setResult('');
-    setLoading(true);
-    try{
+      setResult('');
+      setLoading(true);
+      try {
+        const token = localStorage.getItem('token');
+        console.log('[BasicCalcTab] calling /calculate/stream with', token);
         const response = await fetch(`${API_BASE_URL}/calculate/stream`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+             'Authorization': token
+             ? `Bearer ${token}`
+             : ''
+          },
           body: JSON.stringify({ question: input }),
         });
 
@@ -48,13 +49,13 @@ const BasicCalcTab = () => {
           fullText += chunk;
           setResult(prev => prev + chunk);
         }
-    }catch (error){
+      } catch (error) {
         console.error("fetch 오류:", error);
         alert("사용 횟수를 초과하였거나 서버와의 연결에 실패했습니다.");
-    }
+      }
 
-    setLoading(false);
-  };
+      setLoading(false);
+    };
 
   return (
       <>

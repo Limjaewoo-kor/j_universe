@@ -1,15 +1,31 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/authContext';
 
 const Header = ({ toggleTheme, theme }) => {
   const navigate = useNavigate();
   const { isLoggedIn, setIsLoggedIn } = useAuth();
+  const [userEmail, setUserEmail] = useState('');
+  const [usageCount, setUsageCount] = useState(null);
+  const [dailyLimit, setDailyLimit] = useState(null);
+
+  useEffect(() => {
+    const email = localStorage.getItem("email");
+    const usage = localStorage.getItem("usage_count");
+    const limit = localStorage.getItem("daily_limit");
+    if (email) setUserEmail(email);
+    if (usage) setUsageCount(parseInt(usage));
+    if (limit) setDailyLimit(parseInt(limit));
+  }, [isLoggedIn]);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem("token");
+    localStorage.removeItem("email");
+    localStorage.removeItem("usage_count");
+    localStorage.removeItem("daily_limit");
     setIsLoggedIn(false);
-    navigate('/login');
+    setUserEmail("");
+    navigate("/login");
   };
 
   return (
@@ -26,35 +42,33 @@ const Header = ({ toggleTheme, theme }) => {
           )}
         </nav>
       </div>
-      <div className="flex items-center gap-2 mt-2 md:mt-0">
-        {isLoggedIn ? (
-          <button
-            onClick={handleLogout}
-            className="px-4 py-2 text-sm font-semibold text-white bg-red-500 rounded-full"
-          >
-            Sign out
-          </button>
-        ) : (
-          <Link
-            to="/login"
-            className="px-4 py-2 text-sm font-semibold text-white bg-blue-500 rounded-full"
-          >
-            Sign in
-          </Link>
+      <div className="flex flex-col items-end gap-2 mt-4 md:mt-0">
+        {isLoggedIn && (
+            <div className="text-sm font-semibold text-green-300">
+              어서오세요, <span className="text-yellow-400">{userEmail}</span> 님
+            </div>
         )}
-          {/*   <Link*/}
-          {/*  to="/signup"*/}
-          {/*  className="px-4 py-2 text-sm font-semibold text-white bg-green-500 rounded-full"*/}
-          {/*>*/}
-          {/*  Sign up*/}
-          {/*</Link>*/}
-          {/*<button*/}
-          {/*  onClick={toggleTheme}*/}
-          {/*  className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:scale-105 transition-transform"*/}
-          {/*  title="테마 전환"*/}
-          {/*>*/}
-          {/*  {theme === 'dark' ? <Sun className="w-5 h-5 text-yellow-300" /> : <Moon className="w-5 h-5 text-gray-800" />}*/}
-          {/*</button>*/}
+        {isLoggedIn ? (
+            <button
+                onClick={handleLogout}
+                className="px-4 py-2 text-sm font-semibold text-white bg-red-500 rounded-full"
+            >
+              Sign out
+            </button>
+        ) : (
+            <Link
+                to="/login"
+                className="px-4 py-2 text-sm font-semibold text-white bg-blue-500 rounded-full"
+            >
+              Sign in
+            </Link>
+        )}
+        {/*<Link*/}
+        {/*  to="/signup"*/}
+        {/*  className="px-4 py-2 text-sm font-semibold text-white bg-green-500 rounded-full"*/}
+        {/*>*/}
+        {/*  Sign up*/}
+        {/*</Link>*/}
       </div>
     </header>
   );

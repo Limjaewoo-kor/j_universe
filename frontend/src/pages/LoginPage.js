@@ -6,7 +6,7 @@ import login from '../api/login';
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { setIsLoggedIn } = useAuth();
+  const { setIsLoggedIn, setUserEmail } = useAuth(); //
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -14,7 +14,11 @@ const LoginPage = () => {
     try {
       const data = await login(email, password);
       localStorage.setItem('token', data.access_token);
+      localStorage.setItem('email', email);
+      localStorage.setItem('usage_count', data.usage_count); // 현재 사용 횟수
+      localStorage.setItem('daily_limit', data.daily_limit);//  사용 가능 횟수
       setIsLoggedIn(true);
+      setUserEmail(email);
       navigate("/");
     } catch (error) {
       alert('로그인 실패');

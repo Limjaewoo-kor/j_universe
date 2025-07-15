@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useState } from 'react';
 import { UserInputContext } from '../contexts/UserInputContext';
 import { generatePoliteMessage } from '../api/gptService';
 import useClipboard from '../hooks/useClipboard';
-import { checkLocalGptLimit, getRemainingGptCalls } from "../utils/checkLocalGptLimit";
 import ReactGA from 'react-ga4';
 
 function ResultPage() {
@@ -17,23 +16,13 @@ function ResultPage() {
 
   const [loading, setLoading] = useState(false);
   const [copied, copyToClipboard] = useClipboard();
-  const [remainingCalls, setRemainingCalls] = useState(10);
+  const [remainingCalls, setRemainingCalls] = useState(null);
 
-  useEffect(() => {
-    setRemainingCalls(getRemainingGptCalls());
-  }, []);
 
   const fetchResult = async (customTone = tone) => {
-
-    if (!checkLocalGptLimit()) {
-      alert("오늘의 무료 GPT 사용 횟수를 모두 사용하셨습니다.\n내일 다시 이용해 주세요.");
-      return;
-    }
-    setRemainingCalls(getRemainingGptCalls());  // 호출 성공 시 갱신
-
+    console.log("🔥 fetchResult() called");
     setLoading(true);
 
-    // ✅ GA 이벤트 전송
     ReactGA.event({
       category: 'Button',
       action: 'Click generate',
@@ -46,7 +35,6 @@ function ResultPage() {
         inputText,
         tone: customTone,
       });
-      setTone(customTone);
       setResultText(response);
     } catch (error) {
       if (error.message.includes("429")) {
@@ -60,6 +48,7 @@ function ResultPage() {
       setLoading(false);
     }
   };
+
 
   const handleSaveToHistory = () => {
     const history = JSON.parse(localStorage.getItem('messageHistory') || '[]');
@@ -116,9 +105,23 @@ function ResultPage() {
     alert(isLike ? '좋아요가 저장되었습니다 😊' : '피드백 감사합니다 🙏');
   };
 
-// eslint-disable-next-line react-hooks/exhaustive-deps
+
   useEffect(() => {
-    if (!resultText) fetchResult();
+    const fetchUsage = async () => {
+      const token = localStorage.getItem("token");
+      try {
+        const res = await fetch(`${process.env.REACT_APP_API_URL || "http://localhost:8000"}/gpt-usage`, {
+          headers: {
+            "Authorization": token ? `Bearer ${token}` : ""
+          }
+        });
+        const data = await res.json();
+        setRemainingCalls(data.remaining);
+      } catch (err) {
+        console.error("GPT 사용량 조회 실패:", err);
+      }
+    };
+    fetchUsage();
   }, []);
 
 return (
@@ -193,10 +196,10 @@ return (
         textAlign: "center"
       }}>
         일정 시간 사용하지 않으면 간혹 기능이 동작하지 않는 경우가 있습니다.<br/>
-        약 2~3분 후에 화면을 새로고침 하신 후 다시 시도해 주세요.
+        약 1분 후에 화면을 새로고침 하신 후 다시 시도해 주세요.
         <br/>
         If you do not use it for a certain period of time, the function may not work occasionally.<br/>
-        Please refresh the screen after about 2-3 minutes and try again.
+        Please refresh the screen after about 1 minutes and try again.
       </p>
 
       {/* 피드백 */}

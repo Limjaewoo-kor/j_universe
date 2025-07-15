@@ -23,7 +23,7 @@ function HistoryPage() {
 return (
   <div className="min-h-screen bg-gradient-to-b from-white to-blue-50 dark:from-gray-900 dark:to-gray-800 px-6 py-12 flex flex-col items-center text-gray-800 dark:text-white">
     <h2 className="text-2xl sm:text-3xl font-extrabold text-blue-700 dark:text-blue-300 mb-6 text-center drop-shadow">
-      📜 저장된 문장 히스토리
+      📜 저장된 문장 히스토리(쿠키)
     </h2>
 
     {history.length > 0 && (

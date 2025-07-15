@@ -2,9 +2,13 @@
 const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
 export async function askRagChatStream(question, onChunk) {
+  const token = localStorage.getItem('token');
   const response = await fetch(`${API_BASE_URL}/rag-chat`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": token ? `Bearer ${token}` : ''
+    },
     body: JSON.stringify({ question }),
   });
 

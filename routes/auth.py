@@ -1,11 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from schemas import user as user_schema
-from models import user as user_model
+from models import user as user_model, gpt_usage
 from passlib.context import CryptContext
 from auth.jwt_handler import create_access_token
-from .token import get_current_user
 from database import get_db
+from fastapi.security import OAuth2PasswordBearer
+from auth.jwt_handler import decode_access_token
+from models.user import User
 
 router = APIRouter()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -34,11 +36,33 @@ def login(form_data: user_schema.UserLogin, db: Session = Depends(get_db)):
     if not db_user or not pwd_context.verify(form_data.password, db_user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    # 로그인 성공 시 토큰 발급
     token = create_access_token(data={"sub": db_user.email})
-    return {"access_token": token, "token_type": "bearer"}
+
+    # GPT 사용 횟수 조회
+    usage = db.query(gpt_usage.GptUsage).filter(gpt_usage.GptUsage.user_id == db_user.id).first()
+    usage_count = usage.usage_count if usage else 0
+    daily_limit = usage.daily_limit if usage else 25  # 기본값 25
+
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "usage_count": usage_count,
+        "daily_limit": daily_limit,
+        "email": db_user.email
+    }
+
+
 
 # 로그인한 사용자 정보 반환
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+
+def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
+    email = decode_access_token(token)
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    return user
+
 @router.get("/me")
-def get_user_info(current_user: user_model.User = Depends(get_current_user)):
-    return {"email": current_user.email, "id": current_user.id}
+def get_me(user: User = Depends(get_current_user)):
+    return {"email": user.email}

@@ -1,10 +1,12 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserInputContext } from '../contexts/UserInputContext';
+import { generatePoliteMessage } from "../api/gptService";
 
 function TonePage() {
   const navigate = useNavigate();
   const { tone, setTone } = useContext(UserInputContext);
+  const { purpose, inputText, setResultText } = useContext(UserInputContext);
   const [selectedTone, setSelectedTone] = useState(tone || '');
   const [error, setError] = useState('');
   const [length, setLength] = useState('중간');
@@ -17,16 +19,30 @@ function TonePage() {
     '친근하게',
   ];
 
-  const handleGenerate = () => {
-    if (!selectedTone) {
-      setError('말투를 선택해주세요.');
-      return;
-    }
-    setTone(selectedTone);
-    navigate('/result', {
-      state: { length, emoji },
-    });
-  };
+  const handleGenerate = async () => {
+      if (!selectedTone) {
+        setError("말투를 선택해주세요.");
+        return;
+      }
+
+      setTone(selectedTone);
+
+      try {
+        const response = await generatePoliteMessage({
+          purpose,
+          inputText,
+          tone: selectedTone,
+        });
+        setResultText(response); // ✅ 이 시점에 미리 결과 저장
+        navigate("/result", {
+          state: { length, emoji },
+        });
+      } catch (err) {
+        alert("문장 생성 실패");
+        console.error(err);
+      }
+    };
+
 
 return (
     <div
@@ -71,16 +87,16 @@ return (
         </div>
 
         <div>
-          <label className="block text-gray-700 dark:text-gray-200 font-semibold mb-2">이모지 포함</label>
-          <label className="inline-flex items-center">
-            <input
-                type="checkbox"
-                checked={emoji}
-                onChange={(e) => setEmoji(e.target.checked)}
-                className="w-5 h-5 mr-2"
-            />
-            이모지를 문장에 포함할래요 😄
-          </label>
+          {/*<label className="block text-gray-700 dark:text-gray-200 font-semibold mb-2">이모지 포함</label>*/}
+          {/*<label className="inline-flex items-center">*/}
+          {/*  <input*/}
+          {/*      type="checkbox"*/}
+          {/*      checked={emoji}*/}
+          {/*      onChange={(e) => setEmoji(e.target.checked)}*/}
+          {/*      className="w-5 h-5 mr-2"*/}
+          {/*  />*/}
+          {/*  이모지를 문장에 포함할래요 😄*/}
+          {/*</label>*/}
         </div>
       </div>
 
@@ -100,10 +116,10 @@ return (
         textAlign: "center"
       }}>
         일정 시간 사용하지 않으면 간혹 기능이 동작하지 않는 경우가 있습니다.<br/>
-        약 2~3분 후에 화면을 새로고침 하신 후 다시 시도해 주세요.
+        약 1분 후에 화면을 새로고침 하신 후 다시 시도해 주세요.
         <br/>
         If you do not use it for a certain period of time, the function may not work occasionally.<br/>
-        Please refresh the screen after about 2-3 minutes and try again.
+        Please refresh the screen after about 1 minutes and try again.
       </p>
     </div>
 );

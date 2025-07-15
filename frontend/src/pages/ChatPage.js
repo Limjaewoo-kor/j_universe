@@ -9,7 +9,6 @@ import { askRagChatStream } from "../api/ragChat";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/authContext";
 import Buymeacoffee from '../components/buymeacoffee';
-import { checkLocalGptLimit, getRemainingGptCalls } from "../utils/checkLocalGptLimit";
 
 const ChatPage = () => {
   const navigate = useNavigate();
@@ -21,12 +20,26 @@ const ChatPage = () => {
   const socketRef = useRef(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:8000";
-  const [remainingCalls, setRemainingCalls] = useState(10);
+  const [remainingCalls, setRemainingCalls] = useState(null);
+
 
   useEffect(() => {
-    setRemainingCalls(getRemainingGptCalls());
+    const fetchUsage = async () => {
+      const token = localStorage.getItem("token");
+      try {
+        const res = await fetch(`${API_BASE_URL}/gpt-usage`, {
+          headers: {
+            "Authorization": token ? `Bearer ${token}` : ""
+          }
+        });
+        const data = await res.json();
+        setRemainingCalls(data.remaining);
+      } catch (err) {
+        console.error("GPT 사용량 조회 실패:", err);
+      }
+    };
+    fetchUsage();
   }, []);
-
 
   useEffect(() => {
     socketRef.current = createWebSocketConnection((msg) => {
@@ -53,13 +66,28 @@ const ChatPage = () => {
       return () => socketRef.current.close();
     }, []);
 
+  const [userEmail, setUserEmail] = useState("");
+
+  useEffect(() => {
+    const storedEmail = localStorage.getItem("email");
+    if (storedEmail) {
+      setUserEmail(storedEmail);
+    }
+  }, []);
+  const token = localStorage.getItem('token');
+  console.log('[BasicCalcTab] calling /calculate/stream with', token);
   const sendMessage = (message) => {
     if (socketRef.current && message.trim()) {
       socketRef.current.send(message);
-      // ✅ DB 저장 요청 추가
+      // DB 저장 요청 추가
       fetch(`${API_BASE_URL}/chat-message`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          'Content-Type': 'application/json',
+           'Authorization': token
+           ? `Bearer ${token}`
+           : ''
+        },
         body: JSON.stringify({
           session_id: "rumbleChat",
           role: userId || "anonymous",
@@ -71,13 +99,6 @@ const ChatPage = () => {
 
   const sendRagMessage = async (msg) => {
     if (!msg.trim()) return;
-
-    if (!checkLocalGptLimit()) {
-      alert("오늘의 무료 GPT 사용 횟수를 모두 사용하셨습니다.\n내일 다시 이용해 주세요.");
-      return;
-    }
-    setRemainingCalls(getRemainingGptCalls());  // 호출 성공 시 갱신
-
 
     setRagMessages((prev) => [...prev, { role: "user", content: msg }]);
     let currentAnswer = "";
@@ -103,9 +124,13 @@ const ChatPage = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem("token");
+    localStorage.removeItem("email");
+    localStorage.removeItem("usage_count");
+    localStorage.removeItem("daily_limit");
     setIsLoggedIn(false);
-    navigate('/login');
+    setUserEmail("");
+    navigate("/login");
   };
 
   return (
@@ -133,7 +158,12 @@ const ChatPage = () => {
             </p>
           </div>
 
-          <div className="flex gap-2 mt-4 md:mt-0">
+          <div className="flex flex-col items-end gap-2 mt-4 md:mt-0">
+            {isLoggedIn && (
+                <div className="text-sm font-semibold text-green-300">
+                  어서오세요, <span className="text-yellow-400">{userEmail}</span> 님
+                </div>
+            )}
             {isLoggedIn ? (
                 <button
                     onClick={handleLogout}
@@ -147,6 +177,7 @@ const ChatPage = () => {
                   Sign in
                 </Link>
             )}
+
             {/*<Link*/}
             {/*  to="/signup"*/}
             {/*  className="px-4 py-2 text-sm font-semibold text-white bg-green-500 rounded-full"*/}
@@ -217,10 +248,10 @@ const ChatPage = () => {
           textAlign: "center"
         }}>
           일정 시간 사용하지 않으면 간혹 기능이 동작하지 않는 경우가 있습니다.<br/>
-          약 2~3분 후에 화면을 새로고침 하신 후 다시 시도해 주세요.
+          약 1분 후에 화면을 새로고침 하신 후 다시 시도해 주세요.
           <br/>
           If you do not use it for a certain period of time, the function may not work occasionally.<br/>
-          Please refresh the screen after about 2-3 minutes and try again.
+          Please refresh the screen after about 1 minutes and try again.
         </p>
         <div style={{textAlign: "center", padding: '30px 20px'}}>
           {/* 콘텐츠 */}

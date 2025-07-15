@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { useAuth } from './contexts/authContext';
 import ReactGA from 'react-ga4';
 
 import { UserInputProvider } from './contexts/UserInputContext';
@@ -37,30 +38,18 @@ function usePageTracking() {
 }
 
 function AppWrapper() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  // const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light'); // 기본값 light 테마
+  const { isLoggedIn, setIsLoggedIn } = useAuth();
   const location = useLocation();
 
   document.body.classList.add('dark');
 
-  // // 로그인 상태 체크 (localStorage에서 토큰 확인)
+  // 로그인 상태 체크 (localStorage에서 토큰 확인)
   useEffect(() => {
     const token = localStorage.getItem('token');
-    setIsLoggedIn(!!token);  // 토큰이 있으면 로그인 상태로 설정, 없으면 로그인 상태 아님
+    setIsLoggedIn(!!token);
   }, []);
 
   document.body.classList.add('dark');
-  // const toggleTheme = () => {
-  //   const newTheme = theme === 'light' ? 'dark' : 'light';
-  //   setTheme(newTheme);
-  //   localStorage.setItem('theme', newTheme);
-  //   document.body.classList.toggle('dark', newTheme === 'dark'); // body에 dark 클래스를 추가하거나 제거
-  // };
-  //
-  // useEffect(() => {
-  //   // 페이지 로드 시 테마 설정
-  //   document.body.classList.toggle('dark', theme === 'dark');
-  // }, [theme]);
 
   const hideHeaderPaths = ['/', '/chat','/login'];
   const allPagePaths = [
@@ -78,12 +67,9 @@ function AppWrapper() {
     <>
        {shouldShowHeader && (
         <Header
-          // isLoggedIn={isLoggedIn}
-          // setIsLoggedIn={setIsLoggedIn}
-          // toggleTheme={toggleTheme}
         />
       )}
-      {/*<Header isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} toggleTheme={toggleTheme} />*/}
+
       <Routes>
         <Route path="/" element={<MainPage />} />
          {/* chat 경로 추가 */}

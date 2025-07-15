@@ -3,16 +3,29 @@ import React, {useEffect, useState} from 'react';
 import { useNavigate } from 'react-router-dom';
 import Buymeacoffee from '../components/buymeacoffee';
 import heroImage from '../assets/hero-writing.svg'; // 이미지 파일 위치
-import { checkLocalGptLimit, getRemainingGptCalls } from "../utils/checkLocalGptLimit";
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const [remainingCalls, setRemainingCalls] = useState(10);
+  const [remainingCalls, setRemainingCalls] = useState(null);
   const handleStartClick = () => {
     navigate('/purpose');
   };
   useEffect(() => {
-    setRemainingCalls(getRemainingGptCalls());
+    const fetchUsage = async () => {
+      const token = localStorage.getItem('token');
+      try {
+        const res = await fetch(`${process.env.REACT_APP_API_URL || "http://localhost:8000"}/gpt-usage`, {
+          headers: {
+            'Authorization': token ? `Bearer ${token}` : ''
+          }
+        });
+        const data = await res.json();
+        setRemainingCalls(data.remaining);
+      } catch (err) {
+        console.error("GPT 사용량 조회 실패:", err);
+      }
+    };
+    fetchUsage();
   }, []);
 
   return (
@@ -114,10 +127,10 @@ export default function HomePage() {
           textAlign: "center"
         }}>
           일정 시간 사용하지 않으면 간혹 기능이 동작하지 않는 경우가 있습니다.<br/>
-          약 2~3분 후에 화면을 새로고침 하신 후 다시 시도해 주세요.
+          약 1분 후에 화면을 새로고침 하신 후 다시 시도해 주세요.
           <br/>
           If you do not use it for a certain period of time, the function may not work occasionally.<br/>
-          Please refresh the screen after about 2-3 minutes and try again.
+          Please refresh the screen after about 1 minutes and try again.
         </p>
         <div style={{textAlign: "center", padding: '30px 20px'}}>
           {/* 콘텐츠 */}
