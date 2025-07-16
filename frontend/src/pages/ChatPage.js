@@ -21,6 +21,7 @@ const ChatPage = () => {
   const [showFeedback, setShowFeedback] = useState(false);
   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:8000";
   const [remainingCalls, setRemainingCalls] = useState(null);
+  const [userNickname, setUserNickname] = useState("");
 
 
   useEffect(() => {
@@ -44,7 +45,13 @@ const ChatPage = () => {
   useEffect(() => {
     socketRef.current = createWebSocketConnection((msg) => {
       if (typeof msg === "string" && msg.startsWith("__id__:")) {
-        setUserId(msg.replace("__id__:", ""));
+        const randomId = msg.replace("__id__:", "");
+        const nickname = localStorage.getItem("nickname");
+        if (nickname) {
+          setUserId(nickname);  // 👈 로그인 사용자: 닉네임 사용
+        } else {
+          setUserId(randomId);  // 👈 비회원: 랜덤 ID 사용
+        }
       } else if (typeof msg === "string" && msg.startsWith("__usercount__:")) {
         const count = parseInt(msg.replace("__usercount__:", ""), 10);
         setUserCount(count);
@@ -52,45 +59,64 @@ const ChatPage = () => {
         setMessages((prevMessages) => [...prevMessages, msg]);
       }
     });
-    //DB에서 채팅 이력 불러오기 (익명 채팅방 고정 session_id 사용)
+
+    // DB에서 채팅 이력 불러오기
     fetch(`${API_BASE_URL}/chat-history/rumbleChat`)
       .then((res) => res.json())
       .then((data) => {
-         if (Array.isArray(data)) {
-            const restored = data.map(m => `${m.role} : ${m.content}`);
-            setMessages(restored);
-         } else {
-            console.error("Expected array but got:", data);
-         }
+         const testData = [];
+        if (Array.isArray(data) && data.length > 0) {
+          const restored = data.map(m => `${m.role} : ${m.content}`);
+          setMessages(restored);
+        } else {
+          console.warn("빈 메시지 응답 - 재시도 예정");
+
+          // 2초 후 자동 재시도
+          setTimeout(() => {
+            fetch(`${API_BASE_URL}/chat-history/rumbleChat`)
+              .then(res => res.json())
+              .then(retryData => {
+                if (Array.isArray(retryData) && retryData.length > 0) {
+                  const restored = retryData.map(m => `${m.role} : ${m.content}`);
+                  setMessages(restored);
+                } else {
+                  console.error("슬립 해제 후에도 빈 응답");
+                }
+              })
+              .catch(err => console.error("재시도 실패:", err));
+          }, 5000);
+        }
+      })
+      .catch(err => {
+        console.error("초기 채팅 이력 로드 실패:", err);
       });
-      return () => socketRef.current.close();
-    }, []);
+
+    return () => socketRef.current.close();
+  }, []);
+
 
   const [userEmail, setUserEmail] = useState("");
 
   useEffect(() => {
-    const storedEmail = localStorage.getItem("email");
-    if (storedEmail) {
-      setUserEmail(storedEmail);
-    }
+  const storedEmail = localStorage.getItem("email");
+  const storedNickname = localStorage.getItem("nickname");
+  if (storedEmail) setUserEmail(storedEmail);
+  if (storedNickname) setUserNickname(storedNickname);
   }, []);
   const token = localStorage.getItem('token');
-  console.log('[BasicCalcTab] calling /calculate/stream with', token);
   const sendMessage = (message) => {
     if (socketRef.current && message.trim()) {
       socketRef.current.send(message);
-      // DB 저장 요청 추가
+      const nickname = localStorage.getItem("nickname");
       fetch(`${API_BASE_URL}/chat-message`, {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
-           'Authorization': token
-           ? `Bearer ${token}`
-           : ''
+          'Authorization': token ? `Bearer ${token}` : ''
         },
         body: JSON.stringify({
           session_id: "rumbleChat",
-          role: userId || "anonymous",
+          role: nickname || userId || "anonymous",  // 닉네임 우선 사용
           content: message
         })
       });
@@ -126,6 +152,7 @@ const ChatPage = () => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("email");
+    localStorage.removeItem("nickname");
     localStorage.removeItem("usage_count");
     localStorage.removeItem("daily_limit");
     setIsLoggedIn(false);
@@ -160,9 +187,9 @@ const ChatPage = () => {
 
           <div className="flex flex-col items-end gap-2 mt-4 md:mt-0">
             {isLoggedIn && (
-                <div className="text-sm font-semibold text-green-300">
-                  어서오세요, <span className="text-yellow-400">{userEmail}</span> 님
-                </div>
+              <div className="text-sm font-semibold text-green-300">
+                어서오세요, <span className="text-yellow-400">{userNickname || userEmail}</span> 님
+              </div>
             )}
             {isLoggedIn ? (
                 <button
@@ -199,8 +226,20 @@ const ChatPage = () => {
             <p className="text-sm mb-4 text-gray-600 dark:text-gray-300">
               Current Users in Chat Room: {userCount}
             </p>
-            <ChatBox messages={messages} myId={userId}/>
-            <ChatInput sendMessage={sendMessage}/>
+              {messages.length === 0 && (
+            <p className="text-sm text-yellow-400 font-semibold mb-2">
+              ⚠️ 서버가 준비 중이거나 최초 로딩 중입니다. 잠시만 기다려 주세요...
+            </p>
+            )}
+            <ChatBox messages={messages} myId={userId} />
+
+            {userId && (
+              <p className="text-sm text-gray-400 mb-1">
+                나의 채팅방 ID: <span className="font-mono text-blue-300">{userId}</span>
+              </p>
+            )}
+
+            <ChatInput sendMessage={sendMessage} />
             <p className="text-sm mt-2 text-gray-500 dark:text-gray-400">
               채팅방 접속자들에게 질문해보세요.<br/>
               Ask questions to chat room users.

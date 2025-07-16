@@ -15,6 +15,7 @@ const LoginPage = () => {
       const data = await login(email, password);
       localStorage.setItem('token', data.access_token);
       localStorage.setItem('email', email);
+      localStorage.setItem('nickname', data.nickname || "");
       localStorage.setItem('usage_count', data.usage_count); // 현재 사용 횟수
       localStorage.setItem('daily_limit', data.daily_limit);//  사용 가능 횟수
       setIsLoggedIn(true);

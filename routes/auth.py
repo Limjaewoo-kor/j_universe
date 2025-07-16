@@ -22,7 +22,11 @@ def signup(user: user_schema.UserCreate, db: Session = Depends(get_db)):
 
     # 비밀번호 해싱 후 사용자 저장
     hashed_pw = pwd_context.hash(user.password)
-    new_user = user_model.User(email=user.email, hashed_password=hashed_pw)
+    new_user = user_model.User(
+        email=user.email,
+        hashed_password=hashed_pw,
+        nickname=user.nickname
+    )
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
@@ -48,7 +52,8 @@ def login(form_data: user_schema.UserLogin, db: Session = Depends(get_db)):
         "token_type": "bearer",
         "usage_count": usage_count,
         "daily_limit": daily_limit,
-        "email": db_user.email
+        "email": db_user.email,
+        "nickname": db_user.nickname
     }
 
 
@@ -65,4 +70,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
 
 @router.get("/me")
 def get_me(user: User = Depends(get_current_user)):
-    return {"email": user.email}
+    return {
+        "email": user.email,
+        "nickname": user.nickname
+    }

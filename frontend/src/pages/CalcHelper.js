@@ -16,6 +16,8 @@ const CalcHelperPage = () => {
   const navigate = useNavigate();
   const [remainingCalls, setRemainingCalls] = useState(null);
   const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
+  const [userNickname, setUserNickname] = useState('');
+
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -32,9 +34,15 @@ const CalcHelperPage = () => {
      });
   }, [tab /* 탭 바뀔 때마다 */, /* 로그인 상태가 바뀔 수도 있으니 */]);
 
+  useEffect(() => {
+  const nickname = localStorage.getItem("nickname");
+  if (nickname) setUserNickname(nickname);
+}, []);
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("email");
+    localStorage.removeItem("nickname");
     localStorage.removeItem("usage_count");
     localStorage.removeItem("daily_limit");
     setIsLoggedIn(false);
@@ -68,7 +76,7 @@ const CalcHelperPage = () => {
           <div className="flex flex-col items-end gap-2 mt-4 md:mt-0">
             {isLoggedIn && (
               <div className="text-sm font-semibold text-green-300">
-                어서오세요, <span className="text-yellow-400">{userEmail}</span> 님
+                어서오세요, <span className="text-yellow-400">{userNickname}</span> 님
               </div>
             )}
             <div className="flex gap-2">

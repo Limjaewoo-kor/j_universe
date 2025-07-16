@@ -8,12 +8,16 @@ const Header = ({ toggleTheme, theme }) => {
   const [userEmail, setUserEmail] = useState('');
   const [usageCount, setUsageCount] = useState(null);
   const [dailyLimit, setDailyLimit] = useState(null);
+  const [userNickname, setUserNickname] = useState('');
+
 
   useEffect(() => {
     const email = localStorage.getItem("email");
+    const nickname = localStorage.getItem("nickname");
     const usage = localStorage.getItem("usage_count");
     const limit = localStorage.getItem("daily_limit");
     if (email) setUserEmail(email);
+    if (nickname) setUserNickname(nickname);
     if (usage) setUsageCount(parseInt(usage));
     if (limit) setDailyLimit(parseInt(limit));
   }, [isLoggedIn]);
@@ -21,6 +25,7 @@ const Header = ({ toggleTheme, theme }) => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("email");
+    localStorage.removeItem("nickname");
     localStorage.removeItem("usage_count");
     localStorage.removeItem("daily_limit");
     setIsLoggedIn(false);
@@ -44,9 +49,9 @@ const Header = ({ toggleTheme, theme }) => {
       </div>
       <div className="flex flex-col items-end gap-2 mt-4 md:mt-0">
         {isLoggedIn && (
-            <div className="text-sm font-semibold text-green-300">
-              어서오세요, <span className="text-yellow-400">{userEmail}</span> 님
-            </div>
+          <div className="text-sm font-semibold text-green-300">
+            어서오세요, <span className="text-yellow-400">{userNickname || userEmail}</span> 님
+          </div>
         )}
         {isLoggedIn ? (
             <button
