@@ -43,14 +43,15 @@ const ChatPage = () => {
   }, []);
 
   useEffect(() => {
+    // 1. 웹소켓 연결
     socketRef.current = createWebSocketConnection((msg) => {
       if (typeof msg === "string" && msg.startsWith("__id__:")) {
         const randomId = msg.replace("__id__:", "");
         const nickname = localStorage.getItem("nickname");
         if (nickname) {
-          setUserId(nickname);  // 👈 로그인 사용자: 닉네임 사용
+          setUserId(nickname); // 로그인 사용자
         } else {
-          setUserId(randomId);  // 👈 비회원: 랜덤 ID 사용
+          setUserId(randomId); // 비회원
         }
       } else if (typeof msg === "string" && msg.startsWith("__usercount__:")) {
         const count = parseInt(msg.replace("__usercount__:", ""), 10);
@@ -60,38 +61,41 @@ const ChatPage = () => {
       }
     });
 
-    // DB에서 채팅 이력 불러오기
-    fetch(`${API_BASE_URL}/chat-history/rumbleChat`)
-      .then((res) => res.json())
-      .then((data) => {
-         const testData = [];
-        if (Array.isArray(data) && data.length > 0) {
-          const restored = data.map(m => `${m.role} : ${m.content}`);
-          setMessages(restored);
-        } else {
-          console.warn("빈 메시지 응답 - 재시도 예정");
+    // 2. 채팅 이력 불러오기 함수 (재시도 포함)
+    const MAX_RETRIES = 3;
+    const RETRY_DELAY = 5000;
 
-          // 2초 후 자동 재시도
-          setTimeout(() => {
-            fetch(`${API_BASE_URL}/chat-history/rumbleChat`)
-              .then(res => res.json())
-              .then(retryData => {
-                if (Array.isArray(retryData) && retryData.length > 0) {
-                  const restored = retryData.map(m => `${m.role} : ${m.content}`);
-                  setMessages(restored);
-                } else {
-                  console.error("슬립 해제 후에도 빈 응답");
-                }
-              })
-              .catch(err => console.error("재시도 실패:", err));
-          }, 5000);
-        }
-      })
-      .catch(err => {
-        console.error("초기 채팅 이력 로드 실패:", err);
-      });
+    const fetchChatHistory = (retryCount = 0) => {
+      fetch(`${API_BASE_URL}/chat-history/rumbleChat`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (Array.isArray(data) && data.length > 0) {
+            const restored = data.map((m) => `${m.role} : ${m.content}`);
+            setMessages(restored);
+          } else {
+            console.warn(`빈 메시지 응답 - 재시도 예정 (${retryCount + 1}/${MAX_RETRIES})`);
+            if (retryCount < MAX_RETRIES) {
+              setTimeout(() => fetchChatHistory(retryCount + 1), RETRY_DELAY);
+            } else {
+              console.error("슬립 해제 후에도 빈 응답 (최대 재시도 도달)");
+            }
+          }
+        })
+        .catch((err) => {
+          console.error("채팅 이력 로드 실패:", err);
+          if (retryCount < MAX_RETRIES) {
+            console.warn(`에러 발생 - ${RETRY_DELAY / 1000}초 후 재시도 (${retryCount + 1}/${MAX_RETRIES})`);
+            setTimeout(() => fetchChatHistory(retryCount + 1), RETRY_DELAY);
+          }
+        });
+    };
 
-    return () => socketRef.current.close();
+    fetchChatHistory(); // 실행
+
+    // 3. 언마운트 시 소켓 연결 해제
+    return () => {
+      socketRef.current?.close();
+    };
   }, []);
 
 
