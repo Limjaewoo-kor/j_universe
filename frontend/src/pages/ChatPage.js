@@ -22,7 +22,8 @@ const ChatPage = () => {
   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:8000";
   const [remainingCalls, setRemainingCalls] = useState(null);
   const [userNickname, setUserNickname] = useState("");
-  const [chatbotInitFailed, setChatbotInitFailed] = useState(false);
+  const [chatbotInitStatus, setChatbotInitStatus] = useState(null); // null: 로딩중, false: OK, true: 실패
+
 
   useEffect(() => {
     const fetchUsage = async () => {
@@ -93,17 +94,18 @@ const ChatPage = () => {
           method: "OPTIONS",
         });
         if (!res.ok) throw new Error("status not ok");
-        setChatbotInitFailed(false);
+        setChatbotInitStatus(false);  // 정상 연결
       } catch (err) {
         if (retryCount < MAX_RETRIES) {
           setTimeout(() => checkChatMessageHealth(retryCount + 1), RETRY_DELAY);
         } else {
-          setChatbotInitFailed(true);
+          setChatbotInitStatus(true);  // 실패
         }
       }
     };
     checkChatMessageHealth();
   }, []);
+
 
   const [userEmail, setUserEmail] = useState("");
   useEffect(() => {
@@ -262,7 +264,7 @@ const ChatPage = () => {
               가이드봇에 추가하실 정보가 있다면 Feedback을 작성해주세요.<br/>
               If you have information to add, please write feedback.
             </p>
-            {chatbotInitFailed && (
+            {chatbotInitStatus !== false && (
               <p className="text-sm text-yellow-400 font-semibold mb-2">
                 ⚠️ 서버가 준비 중이거나 최초 로딩 중입니다. 잠시만 기다려 주세요...
               </p>
