@@ -22,7 +22,7 @@ const ChatPage = () => {
   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:8000";
   const [remainingCalls, setRemainingCalls] = useState(null);
   const [userNickname, setUserNickname] = useState("");
-
+  const [chatbotInitFailed, setChatbotInitFailed] = useState(false);
 
   useEffect(() => {
     const fetchUsage = async () => {
@@ -43,16 +43,11 @@ const ChatPage = () => {
   }, []);
 
   useEffect(() => {
-    // 1. 웹소켓 연결
     socketRef.current = createWebSocketConnection((msg) => {
       if (typeof msg === "string" && msg.startsWith("__id__:")) {
         const randomId = msg.replace("__id__:", "");
         const nickname = localStorage.getItem("nickname");
-        if (nickname) {
-          setUserId(nickname); // 로그인 사용자
-        } else {
-          setUserId(randomId); // 비회원
-        }
+        setUserId(nickname || randomId);
       } else if (typeof msg === "string" && msg.startsWith("__usercount__:")) {
         const count = parseInt(msg.replace("__usercount__:", ""), 10);
         setUserCount(count);
@@ -61,7 +56,6 @@ const ChatPage = () => {
       }
     });
 
-    // 2. 채팅 이력 불러오기 함수 (재시도 포함)
     const MAX_RETRIES = 3;
     const RETRY_DELAY = 5000;
 
@@ -72,46 +66,60 @@ const ChatPage = () => {
           if (Array.isArray(data) && data.length > 0) {
             const restored = data.map((m) => `${m.role} : ${m.content}`);
             setMessages(restored);
-          } else {
-            console.warn(`빈 메시지 응답 - 재시도 예정 (${retryCount + 1}/${MAX_RETRIES})`);
-            if (retryCount < MAX_RETRIES) {
-              setTimeout(() => fetchChatHistory(retryCount + 1), RETRY_DELAY);
-            } else {
-              console.error("슬립 해제 후에도 빈 응답 (최대 재시도 도달)");
-            }
+          } else if (retryCount < MAX_RETRIES) {
+            setTimeout(() => fetchChatHistory(retryCount + 1), RETRY_DELAY);
           }
         })
         .catch((err) => {
-          console.error("채팅 이력 로드 실패:", err);
           if (retryCount < MAX_RETRIES) {
-            console.warn(`에러 발생 - ${RETRY_DELAY / 1000}초 후 재시도 (${retryCount + 1}/${MAX_RETRIES})`);
             setTimeout(() => fetchChatHistory(retryCount + 1), RETRY_DELAY);
           }
         });
     };
 
-    fetchChatHistory(); // 실행
+    fetchChatHistory();
 
-    // 3. 언마운트 시 소켓 연결 해제
     return () => {
       socketRef.current?.close();
     };
   }, []);
 
+  useEffect(() => {
+    const checkChatMessageHealth = async (retryCount = 0) => {
+      const MAX_RETRIES = 3;
+      const RETRY_DELAY = 5000;
+      try {
+        const res = await fetch(`${API_BASE_URL}/chat-message`, {
+          method: "OPTIONS",
+        });
+        if (!res.ok) throw new Error("status not ok");
+        setChatbotInitFailed(false);
+      } catch (err) {
+        if (retryCount < MAX_RETRIES) {
+          setTimeout(() => checkChatMessageHealth(retryCount + 1), RETRY_DELAY);
+        } else {
+          setChatbotInitFailed(true);
+        }
+      }
+    };
+    checkChatMessageHealth();
+  }, []);
 
   const [userEmail, setUserEmail] = useState("");
-
   useEffect(() => {
-  const storedEmail = localStorage.getItem("email");
-  const storedNickname = localStorage.getItem("nickname");
-  if (storedEmail) setUserEmail(storedEmail);
-  if (storedNickname) setUserNickname(storedNickname);
+    const storedEmail = localStorage.getItem("email");
+    const storedNickname = localStorage.getItem("nickname");
+    if (storedEmail) setUserEmail(storedEmail);
+    if (storedNickname) setUserNickname(storedNickname);
   }, []);
+
   const token = localStorage.getItem('token');
+
   const sendMessage = (message) => {
     if (socketRef.current && message.trim()) {
       socketRef.current.send(message);
       const nickname = localStorage.getItem("nickname");
+
       fetch(`${API_BASE_URL}/chat-message`, {
         method: "POST",
         headers: {
@@ -120,7 +128,7 @@ const ChatPage = () => {
         },
         body: JSON.stringify({
           session_id: "rumbleChat",
-          role: nickname || userId || "anonymous",  // 닉네임 우선 사용
+          role: nickname || userId || "anonymous",
           content: message
         })
       });
@@ -133,22 +141,18 @@ const ChatPage = () => {
     setRagMessages((prev) => [...prev, { role: "user", content: msg }]);
     let currentAnswer = "";
 
-    try{
-        setRagMessages((prev) => [...prev, { role: "bot", content: "" }]);
-        await askRagChatStream(msg, (chunk) => {
-          currentAnswer = chunk;
-          setRagMessages((prev) => {
-            const updated = [...prev];
-            updated[updated.length - 1] = { role: "bot", content: currentAnswer };
-            return updated;
-          });
+    try {
+      setRagMessages((prev) => [...prev, { role: "bot", content: "" }]);
+      await askRagChatStream(msg, (chunk) => {
+        currentAnswer = chunk;
+        setRagMessages((prev) => {
+          const updated = [...prev];
+          updated[updated.length - 1] = { role: "bot", content: currentAnswer };
+          return updated;
         });
-    }catch (err){
-      if (err.message.includes("429")) {
-          alert("서버 기준 일일 GPT 사용 횟수를 초과하였습니다.\n내일 다시 이용해 주세요.");
-        } else {
-          alert("사용 횟수를 초과하였거나 서버와의 연결에 실패했습니다.");
-        }
+      });
+    } catch (err) {
+      alert("서버와의 연결에 실패했습니다. 잠시 후 다시 시도해주세요.");
       console.error(err);
     }
   };
@@ -258,6 +262,11 @@ const ChatPage = () => {
               가이드봇에 추가하실 정보가 있다면 Feedback을 작성해주세요.<br/>
               If you have information to add, please write feedback.
             </p>
+            {chatbotInitFailed && (
+              <p className="text-sm text-yellow-400 font-semibold mb-2">
+                ⚠️ 서버가 준비 중이거나 최초 로딩 중입니다. 잠시만 기다려 주세요...
+              </p>
+            )}
             <RagChatBox messages={ragMessages}/>
             <RagChatInput sendMessage={sendRagMessage}/>
             <p className="text-sm mt-2 text-gray-500 dark:text-gray-400">
