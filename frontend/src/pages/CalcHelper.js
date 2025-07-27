@@ -8,6 +8,7 @@ import {Link, useNavigate} from "react-router-dom";
 import {useAuth} from "../contexts/authContext";
 import Buymeacoffee from "../components/buymeacoffee";
 import { useEffect } from 'react';
+import FeedbackForm from "../components/FeedbackForm";
 
 
 const CalcHelperPage = () => {
@@ -17,7 +18,7 @@ const CalcHelperPage = () => {
   const [remainingCalls, setRemainingCalls] = useState(null);
   const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
   const [userNickname, setUserNickname] = useState('');
-
+  const [showFeedback, setShowFeedback] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -70,6 +71,13 @@ const CalcHelperPage = () => {
               <Link to="/" className="hover:text-blue-400">J_Uni_home</Link>
               <span className="mx-2">|</span>
               <Link to="/calc-helper" className="hover:text-blue-400">말로하는 계산기 홈</Link>
+              <span className="mx-2">|</span>
+              <button
+                  className="px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                  onClick={() => setShowFeedback(true)}>
+                Feedback
+              </button>
+              {showFeedback && <FeedbackForm onClose={() => setShowFeedback(false)}/>}
             </nav>
           </div>
 

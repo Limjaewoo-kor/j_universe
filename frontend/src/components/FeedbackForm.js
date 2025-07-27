@@ -11,7 +11,7 @@ const FeedbackForm = ({ onClose }) => {
     try {
       const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:8000";
       await axios.post(`${API_BASE_URL}/feedback`, {
-        project: "rumble_chatbot",
+        project: "j-uni",
         feedback_text: content,
         type: type // 백엔드가 지원한다면
       });
@@ -35,14 +35,15 @@ const FeedbackForm = ({ onClose }) => {
             className="mb-2 w-full p-2 border rounded text-black"
           >
             <option value="">Select Type</option>
-            <option value="bug">Bug</option>
-            <option value="suggestion">Suggestion</option>
-            <option value="etc">Other</option>
+            <option value="j_universe">j_universe[MainPage]</option>
+            <option value="malhaejo">말해조(Malhaejo)</option>
+            <option value="rumble">Rumble_Chatbot</option>
+            <option value="calc">계산해(CalcForMe)</option>
           </select>
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder="가이드봇과 관련된 피드백은 질문/답변 형식으로 작성해주세요. Please provide feedback regarding the chatbot in a question/answer format."
+            placeholder="등록해주신 피드백은 개발자 검토후에 판단하여 적용합니다. The feedback you have registered will be reviewed by the developer and then applied."
             required
             className="mb-2 w-full p-2 border rounded text-black min-h-[120px] sm:min-h-[200px]"
           />

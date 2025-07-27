@@ -1,6 +1,7 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { useNavigate } from 'react-router-dom';
 import Buymeacoffee from "../components/buymeacoffee";
+import FeedbackForm from "../components/FeedbackForm";
 
 const menuList = [
   { label: "말해조(Malhaejo)", to: "/home", description: "사용자가 핵심 내용을 입력하면, 정중하고 공손한 비즈니스 문장 또는 민원 문서를 자동으로 생성해주는 AI 문장 생성 도우미입니다." },
@@ -15,11 +16,18 @@ const menuList = [
 
 export default function MainPage() {
   const navigate = useNavigate();
+  const [showFeedback, setShowFeedback] = useState(false);
 
   return (
     <div className="flex flex-col items-center min-h-screen justify-center px-4 py-10 bg-gray-900 text-white">
       <h1 className="text-4xl sm:text-6xl font-bold mb-12 tracking-widest">J_Universe</h1>
-
+      <button
+          className="px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+          onClick={() => setShowFeedback(true)}>
+        Feedback
+      </button>
+        <br/>
+      {showFeedback && <FeedbackForm onClose={() => setShowFeedback(false)}/>}
       <div className="flex flex-col gap-4 w-full max-w-2xl">
         {menuList.map((menu, idx) => (
           <div
