@@ -282,8 +282,8 @@ const ChatPage = () => {
           color: "gray",
           textAlign: "center"
         }}>
-          본 사이트는 공식 가이드가 아닌 개인의 게임 플레이 경험을 바탕으로 제작된 비공식 콘텐츠입니다.<br/>
-          콘텐츠는 직접 플레이하며 정리한 정보로 구성되어 있으며, 공식 개발사와는 관련이 없습니다.<br/>
+          본 사이트는 공식 가이드가 아닌 개인의 게임 플레이 경험을 바탕으로 제작된 커뮤니티 및 정보 공유 사이트로써 비공식 콘텐츠입니다.<br/>
+          해당 챗봇은 직접 플레이하며 정리한 정보로 구성되어 있으며, 공식 디지몬슈퍼럼블 개발사와는 관련이 없습니다.<br/>
           This site is not an official guide, but unofficial content created based on personal gameplay
           experience. <br/>
           The content consists of information compiled through direct gameplay and is not affiliated with the official
