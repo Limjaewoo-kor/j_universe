@@ -27,6 +27,7 @@ import { AuthProvider } from "./contexts/authContext";
 import Header from './components/Header';
 import PdfUpload from "./pages/PdfUpload";
 import CalcHelper from "./pages/CalcHelper";
+import BrainTrainerPage from "./pages/BrainTrainerPage";
 
 // ✅ 페이지 이동 시 GA 이벤트 전송
 function usePageTracking() {
@@ -98,6 +99,8 @@ function AppWrapper() {
 
         {/* calc-helper 경로 추가 */}
         <Route path="/calc-helper" element={<CalcHelper />} />
+        {/* brain-trainer 경로 추가 */}
+        <Route path="/brain-trainer" element={<BrainTrainerPage />} />
 
       </Routes>
     </>

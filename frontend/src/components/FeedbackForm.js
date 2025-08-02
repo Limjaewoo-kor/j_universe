@@ -39,6 +39,7 @@ const FeedbackForm = ({ onClose }) => {
             <option value="malhaejo">말해조(Malhaejo)</option>
             <option value="rumble">Rumble_Chatbot</option>
             <option value="calc">계산해(CalcForMe)</option>
+            <option value="Brain">두뇌트레이너(BrainTrainer)</option>
           </select>
           <textarea
             value={content}

@@ -7,7 +7,7 @@ const menuList = [
   { label: "말해조(Malhaejo)", to: "/home", description: "사용자가 핵심 내용을 입력하면, 정중하고 공손한 비즈니스 문장 또는 민원 문서를 자동으로 생성해주는 AI 문장 생성 도우미입니다." },
   { label: "Rumble Chatbot", to: "/chat", description: "디지몬슈퍼럼블 가이드를 위해 직접 플레이하며 만든 비공식 챗봇으로 게임 정보 등의 질문에 대응합니다. 공식 디지몬슈퍼럼블 개발사와는 관련이 없습니다." },
   { label: "계산해(CalcForMe)", to: "/calc-helper", description: "사용자가 자연어로 입력한 계산(예: \"23500원을 30% 할인한 금액을 알려줘\")을 숫자로 변환하여 계산해주는 AI 계산기입니다." },
-  { label: "Empty", to: "/", description: "준비 중인 서비스" },
+  { label: "두뇌트레이너(Brain Trainer)", to: "/brain-trainer", description: "10대 ~ 70대 연령별 사용자를 위한 상식, 산수, 기억력 기반의 일일 퀴즈 훈련 프로그램입니다. 가볍게 두뇌를 자극하세요!" },
   { label: "Empty", to: "/", description: "준비 중인 서비스" },
   { label: "Empty", to: "/", description: "준비 중인 서비스" },
   { label: "Empty", to: "/", description: "준비 중인 서비스" },
